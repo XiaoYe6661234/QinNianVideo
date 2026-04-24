@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 移动端适配核心配置，严格保证手机端样式不偏移 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="QinNian 爱豆专属粉丝网站">
+    <meta name="author" content="QinNian 粉丝专属">
+    <title>QinNian 专属站</title>
+    <style>
+        /* 全局样式重置，保证所有浏览器渲染一致 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        /* 全局颜色变量，统一管理，方便后续修改主题 */
+        :root {
+            --primary-pink: #ffd6dc;
+            --accent-red: #ff5c6c;
+            --border-red: #ff3b4e;
+            --text-main: #333333;
+            --text-white: #ffffff;
+            --bg-white: #ffffff;
+            --mask-bg: rgba(0, 0, 0, 0.6);
+            --transition-normal: all 0.3s ease;
+            --border-radius-normal: 8px;
+            --border-radius-round: 50%;
+        }
+
+        /* html与body基础配置，适配全屏 */
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* 未登录时禁止页面滚动 */
+        body.no-scroll {
+            overflow: hidden;
+        }
+
+        /* 顶部导航栏，固定样式，电脑手机端统一核心结构 */
+        header {
+            width: 100%;
+            height: 100px;
+            background-color: var(--primary-pink);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 左上角QinNian Logo样式，严格还原设计 */
+        .logo {
+            font-size: 48px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            color: var(--text-main);
+            user-select: none;
+            /* Logo入场动画 */
+            animation: logoSlideIn 0.7s ease forwards;
+        }
+
+        @keyframes logoSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* 右上角账号按钮，圆形红色样式 */
+        .account-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--border-radius-round);
+            background-color: var(--accent-red);
+            color: var(--text-white);
+            border: none;
+            font-size: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 账号按钮脉冲动画，吸引用户注意 */
+            animation: accountPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes accountPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 92, 108, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 0 14px rgba(255, 92, 108, 0);
+            }
+        }
+
+        .account-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 92, 108, 0.4);
+            animation: none;
+        }
+
+        .account-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 页面容器通用样式，控制显示隐藏 */
+        .page-container {
+            width: 100%;
+            min-height: calc(100vh - 100px);
+            padding: 30px 40px;
+            display: none;
+            /* 修复bug：为profile-btn-group的absolute定位提供参照 */
+            position: relative;
+        }
+
+        .page-container.active {
+            display: block;
+            /* 页面容器激活时的淡入动画 */
+            animation: pageFadeIn 0.5s ease forwards;
+        }
+
+        @keyframes pageFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 首页样式 */
+        /* 首页标题样式，带红色下划线 */
+        .home-title {
+            font-size: 32px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+            /* 标题文字淡入 */
+            animation: titleFadeIn 0.6s ease forwards;
+        }
+
+        @keyframes titleFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .home-title::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--border-red);
+            border-radius: 2px;
+            /* 下划线从左到右展开动画 */
+            animation: underlineExpand 0.7s ease forwards;
+            transform-origin: left center;
+        }
+
+        @keyframes underlineExpand {
+            from {
+                transform: scaleX(0);
+            }
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        /* 卡片网格布局，电脑端每行6个，严格还原设计 */
+        .card-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 25px;
+        }
+
+        /* 单个卡片样式，可点击跳转，支持自定义修改 */
+        .content-card {
+            width: 100%;
+            border: 2px solid var(--border-red);
+            border-radius: var(--border-radius-normal);
+            overflow: hidden;
+            background-color: var(--bg-white);
+            transition: var(--transition-normal);
+            text-decoration: none;
+            color: var(--text-main);
+            display: block;
+            /* 卡片入场动画 - 从下方淡入 */
+            opacity: 0;
+            animation: cardFadeInUp 0.55s ease forwards;
+            animation-delay: 0.05s;
+        }
+
+        @keyframes cardFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(28px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 第2行卡片（7-12）延迟稍长，形成级联效果 */
+        .content-card:nth-child(n+7):nth-child(-n+12) {
+            animation-delay: 0.16s;
+        }
+
+        /* 第3行及以后卡片（13+）延迟最长 */
+        .content-card:nth-child(n+13) {
+            animation-delay: 0.27s;
+        }
+
+        .content-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(255, 59, 78, 0.25);
+        }
+
+        .content-card:active {
+            transform: translateY(-2px);
+        }
+
+        /* 卡片封面图，自适应，可通过修改文件名更换 */
+        .card-cover {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            display: block;
+            background-color: #f5f5f5;
+            transition: transform 0.4s ease;
+        }
+
+        .content-card:hover .card-cover {
+            transform: scale(1.04);
+        }
+
+        /* 卡片标题样式 */
+        .card-title {
+            padding: 12px 10px;
+            font-size: 18px;
+            text-align: center;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .content-card:hover .card-title {
+            color: var(--accent-red);
+        }
+
+        /* 个人中心页面样式 */
+        .profile-title {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            /* 个人中心标题淡入动画 */
+            animation: titleFadeIn 0.5s ease forwards;
+        }
+
+        /* 个人中心操作按钮组（返回、取消、保存） */
+        .profile-btn-group {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            display: flex;
+            gap: 15px;
+            /* 按钮组淡入 */
+            animation: btnGroupFadeIn 0.5s ease forwards;
+        }
+
+        @keyframes btnGroupFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-btn {
+            padding: 10px 22px;
+            background-color: var(--primary-pink);
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .profile-btn:hover {
+            background-color: #ffc0cb;
+            box-shadow: 0 2px 8px rgba(255, 214, 220, 0.6);
+        }
+
+        .profile-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 个人中心表单项样式 */
+        .form-item {
+            margin-bottom: 35px;
+            max-width: 600px;
+            /* 表单项依次淡入 */
+            opacity: 0;
+            animation: formItemFadeIn 0.5s ease forwards;
+        }
+
+        .form-item:nth-child(3) {
+            animation-delay: 0.08s;
+        }
+        .form-item:nth-child(4) {
+            animation-delay: 0.16s;
+        }
+        .form-item:nth-child(5) {
+            animation-delay: 0.24s;
+        }
+
+        @keyframes formItemFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .form-label {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--primary-pink);
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            color: var(--text-main);
+            outline: none;
+            transition: var(--transition-normal);
+        }
+
+        .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(255, 92, 108, 0.2);
+        }
+
+        .form-input:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .form-tip {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #666666;
+        }
+
+        /* 密码修改行样式 */
+        .password-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .modify-btn {
+            padding: 10px 20px;
+            background-color: var(--primary-pink);
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition-normal);
+        }
+
+        .modify-btn:hover {
+            background-color: #ffc0cb;
+        }
+
+        .modify-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 退出登录按钮 */
+        .logout-btn {
+            width: 100%;
+            max-width: 500px;
+            padding: 16px 0;
+            background-color: var(--primary-pink);
+            border: none;
+            border-radius: 4px;
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            margin-top: 60px;
+            transition: var(--transition-normal);
+            /* 退出按钮淡入，延迟稍长 */
+            opacity: 0;
+            animation: formItemFadeIn 0.5s ease forwards;
+            animation-delay: 0.32s;
+        }
+
+        .logout-btn:hover {
+            background-color: #ffb6c1;
+            box-shadow: 0 4px 12px rgba(255, 182, 193, 0.5);
+        }
+
+        /* 登录弹窗遮罩层，未登录时全屏覆盖 */
+        .login-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--mask-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            padding: 20px;
+        }
+
+        .login-mask.hidden {
+            display: none;
+        }
+
+        /* 登录弹窗主体，严格还原设计 */
+        .login-modal {
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-normal);
+            overflow: hidden;
+            display: flex;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: modalShow 0.4s ease forwards;
+        }
+
+        /* 弹窗出现动画 */
+        @keyframes modalShow {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* 弹窗左侧爱豆图片区域 */
+        .modal-left {
+            width: 40%;
+            background-color: var(--primary-pink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .modal-idol-img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            user-select: none;
+            /* 爱豆图片轻柔呼吸动画 */
+            animation: idolBreath 3.5s ease-in-out infinite;
+        }
+
+        @keyframes idolBreath {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.04);
+            }
+        }
+
+        /* 弹窗右侧登录表单区域 */
+        .modal-right {
+            width: 60%;
+            padding: 50px 40px;
+        }
+
+        .modal-title {
+            font-size: 38px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-form-item {
+            margin-bottom: 25px;
+        }
+
+        .login-form-label {
+            font-size: 26px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .login-form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--primary-pink);
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            color: var(--text-main);
+            outline: none;
+            transition: var(--transition-normal);
+        }
+
+        .login-form-input:focus {
+            box-shadow: 0 0 0 3px rgba(255, 92, 108, 0.2);
+        }
+
+        .login-submit-btn {
+            width: 100%;
+            padding: 15px 0;
+            background-color: var(--primary-pink);
+            border: none;
+            border-radius: 4px;
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            margin: 15px 0 20px 0;
+            transition: var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-submit-btn:hover {
+            background-color: #ffc0cb;
+            box-shadow: 0 4px 12px rgba(255, 192, 203, 0.5);
+        }
+
+        .login-submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* 登录按钮点击波纹效果 */
+        .login-submit-btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease, opacity 0.6s ease;
+            pointer-events: none;
+        }
+
+        .login-submit-btn:active::after {
+            width: 300px;
+            height: 300px;
+            opacity: 0;
+        }
+
+        /* 用户协议勾选区域 */
+        .agreement-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .agreement-checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-red);
+            cursor: pointer;
+        }
+
+        .agreement-text {
+            font-size: 16px;
+            color: #333333;
+            user-select: none;
+        }
+
+        /* 提示框样式，用于成功/错误提示 */
+        .toast {
+            position: fixed;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background-color: #f0f9ff;
+            color: #0066cc;
+            border: 1px solid #b3d9ff;
+        }
+
+        .toast.error {
+            background-color: #fff2f0;
+            color: #cf1322;
+            border: 1px solid #ffccc7;
+        }
+
+        /* 密码修改弹窗样式 */
+        .password-modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--mask-bg);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            padding: 20px;
+        }
+
+        .password-modal-mask.show {
+            display: flex;
+        }
+
+        .password-modal {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-normal);
+            padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: modalShow 0.3s ease forwards;
+        }
+
+        .password-modal-title {
+            font-size: 26px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .password-modal-btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .password-modal-btn {
+            flex: 1;
+            padding: 12px 0;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .btn-cancel {
+            background-color: #f5f5f5;
+            color: #666666;
+        }
+
+        .btn-cancel:hover {
+            background-color: #e8e8e8;
+        }
+
+        .btn-confirm {
+            background-color: var(--primary-pink);
+            color: var(--text-main);
+        }
+
+        .btn-confirm:hover {
+            background-color: #ffc0cb;
+        }
+
+        /* 响应式适配 - 平板端 */
+        @media screen and (max-width: 1200px) {
+            .card-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+            }
+
+            .logo {
+                font-size: 40px;
+            }
+
+            .account-btn {
+                width: 70px;
+                height: 70px;
+                font-size: 18px;
+            }
+
+            header {
+                padding: 0 30px;
+                height: 90px;
+            }
+
+            .page-container {
+                padding: 25px 30px;
+            }
+        }
+
+        /* 响应式适配 - 手机端，严格还原设计稿手机端样式 */
+        @media screen and (max-width: 768px) {
+            /* 顶部导航栏手机端适配 */
+            header {
+                height: 80px;
+                padding: 0 20px;
+            }
+
+            .logo {
+                font-size: 36px;
+            }
+
+            .account-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 16px;
+                animation: accountPulse 2.5s ease-in-out infinite;
+            }
+
+            @keyframes accountPulse {
+                0%,
+                100% {
+                    box-shadow: 0 0 0 0 rgba(255, 92, 108, 0.5);
+                }
+                50% {
+                    box-shadow: 0 0 0 10px rgba(255, 92, 108, 0);
+                }
+            }
+
+            .page-container {
+                padding: 20px;
+                min-height: calc(100vh - 80px);
+            }
+
+            /* 首页手机端适配，每行2个卡片，严格还原设计 */
+            .home-title {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 18px;
+            }
+
+            .card-title {
+                font-size: 16px;
+                padding: 10px 8px;
+            }
+
+            /* 手机端卡片行级延迟适配（每行2个） */
+            .content-card:nth-child(n+3):nth-child(-n+4) {
+                animation-delay: 0.16s;
+            }
+            .content-card:nth-child(n+5):nth-child(-n+6) {
+                animation-delay: 0.27s;
+            }
+            .content-card:nth-child(n+7) {
+                animation-delay: 0.38s;
+            }
+
+            /* 个人中心手机端适配 */
+            .profile-title {
+                font-size: 24px;
+                margin-bottom: 30px;
+            }
+
+            .profile-btn-group {
+                position: static;
+                margin-bottom: 30px;
+                justify-content: flex-end;
+            }
+
+            .profile-btn {
+                padding: 8px 16px;
+                font-size: 16px;
+            }
+
+            .form-label {
+                font-size: 20px;
+            }
+
+            .form-input {
+                font-size: 16px;
+                padding: 10px 14px;
+            }
+
+            .logout-btn {
+                font-size: 18px;
+                padding: 12px 0;
+                margin-top: 40px;
+            }
+
+            /* 登录弹窗手机端适配，上下结构，严格还原设计 */
+            .login-modal {
+                flex-direction: column;
+                max-width: 100%;
+            }
+
+            .modal-left {
+                width: 100%;
+                height: 220px;
+                padding: 20px;
+            }
+
+            .modal-idol-img {
+                max-height: 180px;
+                width: auto;
+            }
+
+            .modal-right {
+                width: 100%;
+                padding: 30px 25px;
+            }
+
+            .modal-title {
+                font-size: 28px;
+                margin-bottom: 30px;
+            }
+
+            .login-form-label {
+                font-size: 22px;
+            }
+
+            .login-submit-btn {
+                font-size: 24px;
+                padding: 12px 0;
+            }
+
+            .agreement-text {
+                font-size: 14px;
+            }
+        }
+
+        /* 超小屏手机适配 */
+        @media screen and (max-width: 380px) {
+            .card-grid {
+                gap: 15px;
+            }
+
+            .modal-right {
+                padding: 25px 20px;
+            }
+
+            .modal-title {
+                font-size: 24px;
+            }
+
+            .login-form-label {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="no-scroll">
+    <!-- 全局提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 顶部导航栏 -->
+    <header>
+        <div class="logo">QinNian</div>
+        <button class="account-btn" id="accountBtn">账号</button>
+    </header>
+
+    <!-- 首页容器 -->
+    <div class="page-container active" id="homePage">
+        <h2 class="home-title">首页</h2>
+        <!-- 卡片网格区域，可自由修改卡片数量、图片路径、跳转链接 -->
+        <div class="card-grid">
+            <!-- 卡片1，修改href即可更换跳转页面，修改img的src即可更换封面图，修改.card-title即可更换标题 -->
+            <a href="./video1.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover1.png" alt="视频封面" class="card-cover">
+                <div class="card-title">鸟儿摇</div>
+            </a>
+            <!-- 卡片2 -->
+            <a href="./video2.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover2.png" alt="视频封面" class="card-cover">
+                <div class="card-title">发牌</div>
+            </a>
+            <!-- 卡片3 -->
+            <a href="./video3.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover3.png" alt="视频封面" class="card-cover">
+                <div class="card-title">扭胯舞</div>
+            </a>
+            <!-- 卡片4 -->
+            <a href="./video4.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover4.png" alt="视频封面" class="card-cover">
+                <div class="card-title">辛巴巴巴鲁比拉</div>
+            </a>
+            <!-- 卡片5 -->
+            <a href="./video5.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover5.png" alt="视频封面" class="card-cover">
+                <div class="card-title">知道犯什么事了吗？</div>
+            </a>
+            <!-- 卡片6 -->
+            <a href="./video6.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover6.png" alt="视频封面" class="card-cover">
+                <div class="card-title">高雅人士</div>
+            </a>
+            <!-- 卡片7 -->
+            <a href="./video7.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover7.png" alt="视频封面" class="card-cover">
+                <div class="card-title">毋庸置疑</div>
+            </a>
+            <!-- 卡片8 -->
+            <a href="./video8.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover8.png" alt="视频封面" class="card-cover">
+                <div class="card-title">细腻的稀饭</div>
+            </a>
+            <!-- 卡片9 -->
+            <a href="./video9.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover9.png" alt="视频封面" class="card-cover">
+                <div class="card-title">覃念你不乘哦</div>
+            </a>
+            <!-- 卡片10 -->
+            <a href="./video10.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover10.png" alt="视频封面" class="card-cover">
+                <div class="card-title">标题</div>
+            </a>
+            <!-- 卡片11 -->
+            <a href="./video11.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover11.png" alt="视频封面" class="card-cover">
+                <div class="card-title">覃念骑北极熊</div>
+            </a>
+            <!-- 卡片12 -->
+            <a href="./video12.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover12.png" alt="视频封面" class="card-cover">
+                <div class="card-title">覃念背着我们...</div>
+            </a>
+            <!-- 卡片13 -->
+            <a href="./video13.html" class="content-card">
+                <img src="./images/cover13.png" alt="视频封面" class="card-cover">
+                <div class="card-title">人类高质量覃念</div>
+            </a>
+            <!-- 卡片14 -->
+            <a href="./video14.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover14.png" alt="视频封面" class="card-cover">
+                <div class="card-title">埃及摇</div>
+            </a>
+            <!-- 卡片15 -->
+            <a href="./video15.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover15.png" alt="视频封面" class="card-cover">
+                <div class="card-title">覃念吃播</div>
+            </a>
+            <!-- 卡片16 -->
+            <a href="./video16.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover16.png" alt="视频封面" class="card-cover">
+                <div class="card-title">覃念打金服</div>
+            </a>
+            <!-- 卡片17 -->
+            <a href="./video17.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover17.png" alt="视频封面" class="card-cover">
+                <div class="card-title">欢迎来到渣男团</div>
+            </a>
+            <!-- 卡片18 -->
+            <a href="./video18.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover18.png" alt="视频封面" class="card-cover">
+                <div class="card-title">凌驾-新</div>
+            </a>
+              <a href="./video19.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover19.png" alt="视频封面" class="card-cover">
+                <div class="card-title">我找茬都说不出这种话</div>
+            </a>
+              <a href="./video20.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover20.png" alt="视频封面" class="card-cover">
+                <div class="card-title">聆听</div>
+            </a>
+              <a href="./video21.html" class="content-card">
+                <img src="https://xiaoye6661234.github.io/images/cover21.png" alt="视频封面" class="card-cover">
+                <div class="card-title">独攀</div>
+            </a>
+            
+        </div>
+    </div>
+
+    <!-- 个人中心容器 -->
+    <div class="page-container" id="profilePage">
+        <div class="profile-btn-group">
+            <button class="profile-btn" id="backBtn">返回</button>
+            <button class="profile-btn" id="cancelBtn">取消</button>
+            <button class="profile-btn" id="saveBtn">保存</button>
+        </div>
+        <h2 class="profile-title">个人中心</h2>
+
+        <div class="form-item">
+            <label class="form-label">昵称:</label>
+            <input type="text" class="form-input" id="nicknameInput" placeholder="请输入文本" maxlength="10">
+            <p class="form-tip">*仅支持10字</p>
+        </div>
+
+        <div class="form-item">
+            <label class="form-label">QinNian号:</label>
+            <input type="text" class="form-input" id="qinnianIdInput" value="5201314666" disabled>
+            <p class="form-tip">*不支持修改</p>
+        </div>
+
+        <div class="form-item">
+            <label class="form-label">密码:</label>
+            <div class="password-row">
+                <input type="password" class="form-input" id="passwordInput" value="********" disabled>
+                <button class="modify-btn" id="modifyPwdBtn">修改</button>
+            </div>
+            <p class="form-tip">*每个月最多只能修改一次，且需认证后修改</p>
+        </div>
+
+        <button class="logout-btn" id="logoutBtn">退出登录</button>
+    </div>
+
+    <!-- 登录弹窗遮罩 -->
+    <div class="login-mask" id="loginMask">
+        <div class="login-modal">
+            <div class="modal-left">
+                <!-- 爱豆图片，修改src即可更换图片，路径为仓库内相对路径 -->
+                <img src="./images/idol.png" alt="QinNian" class="modal-idol-img">
+            </div>
+            <div class="modal-right">
+                <h2 class="modal-title">登录/注册</h2>
+                <div class="login-form-item">
+                    <label class="login-form-label">账号:</label>
+                    <input type="text" class="login-form-input" id="loginAccount" placeholder="请输入账号">
+                </div>
+                <div class="login-form-item">
+                    <label class="login-form-label">密码:</label>
+                    <input type="password" class="login-form-input" id="loginPassword" placeholder="请输入密码">
+                </div>
+                <button class="login-submit-btn" id="loginSubmitBtn" disabled>确定</button>
+                <div class="agreement-row">
+                    <input type="checkbox" class="agreement-checkbox" id="agreementCheck">
+                    <label class="agreement-text" for="agreementCheck">请先同意用户协议与隐私策略</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 密码修改弹窗 -->
+    <div class="password-modal-mask" id="passwordModalMask">
+        <div class="password-modal">
+            <h3 class="password-modal-title">修改密码</h3>
+            <div class="form-item">
+                <label class="form-label">原密码:</label>
+                <input type="password" class="form-input" id="oldPwdInput" placeholder="请输入原密码">
+            </div>
+            <div class="form-item">
+                <label class="form-label">新密码:</label>
+                <input type="password" class="form-input" id="newPwdInput" placeholder="请输入新密码">
+            </div>
+            <div class="form-item">
+                <label class="form-label">确认新密码:</label>
+                <input type="password" class="form-input" id="confirmPwdInput" placeholder="请再次输入新密码">
+            </div>
+            <div class="password-modal-btn-group">
+                <button class="password-modal-btn btn-cancel" id="pwdCancelBtn">取消</button>
+                <button class="password-modal-btn btn-confirm" id="pwdConfirmBtn">确认修改</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量与DOM元素获取
+        const DOM = {
+            // 登录相关
+            loginMask: document.getElementById('loginMask'),
+            loginAccount: document.getElementById('loginAccount'),
+            loginPassword: document.getElementById('loginPassword'),
+            agreementCheck: document.getElementById('agreementCheck'),
+            loginSubmitBtn: document.getElementById('loginSubmitBtn'),
+            // 页面切换相关
+            homePage: document.getElementById('homePage'),
+            profilePage: document.getElementById('profilePage'),
+            accountBtn: document.getElementById('accountBtn'),
+            backBtn: document.getElementById('backBtn'),
+            // 个人中心相关
+            nicknameInput: document.getElementById('nicknameInput'),
+            qinnianIdInput: document.getElementById('qinnianIdInput'),
+            passwordInput: document.getElementById('passwordInput'),
+            saveBtn: document.getElementById('saveBtn'),
+            cancelBtn: document.getElementById('cancelBtn'),
+            modifyPwdBtn: document.getElementById('modifyPwdBtn'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            // 密码修改弹窗相关
+            passwordModalMask: document.getElementById('passwordModalMask'),
+            oldPwdInput: document.getElementById('oldPwdInput'),
+            newPwdInput: document.getElementById('newPwdInput'),
+            confirmPwdInput: document.getElementById('confirmPwdInput'),
+            pwdCancelBtn: document.getElementById('pwdCancelBtn'),
+            pwdConfirmBtn: document.getElementById('pwdConfirmBtn'),
+            // 提示框
+            toast: document.getElementById('toast')
+        };
+
+        // 本地存储Key常量，统一管理，防止拼写错误
+        const STORAGE_KEY = {
+            LOGIN_STATUS: 'qinnian_login_status',
+            USER_INFO: 'qinnian_user_info',
+            PWD_MODIFY_TIME: 'qinnian_pwd_modify_time'
+        };
+
+        // 工具函数 - 提示框
+        function showToast(message, type = 'success') {
+            DOM.toast.textContent = message;
+            DOM.toast.className = `toast show ${type}`;
+            setTimeout(() => {
+                DOM.toast.className = 'toast';
+            }, 3000);
+        }
+
+        // 工具函数 - 获取本地存储用户信息
+        function getUserInfo() {
+            const userInfo = localStorage.getItem(STORAGE_KEY.USER_INFO);
+            return userInfo ? JSON.parse(userInfo) : {
+                account: '',
+                password: '',
+                nickname: '',
+                qinnianId: '5201314666'
+            };
+        }
+
+        // 工具函数 - 保存用户信息到本地存储
+        function saveUserInfo(userInfo) {
+            localStorage.setItem(STORAGE_KEY.USER_INFO, JSON.stringify(userInfo));
+        }
+
+        // 工具函数 - 检查登录状态
+        function checkLoginStatus() {
+            const isLogin = localStorage.getItem(STORAGE_KEY.LOGIN_STATUS) === 'true';
+            if (isLogin) {
+                // 已登录，隐藏登录弹窗，允许页面滚动
+                DOM.loginMask.classList.add('hidden');
+                document.body.classList.remove('no-scroll');
+                // 加载用户信息到个人中心
+                loadUserInfoToPage();
+            } else {
+                // 未登录，显示登录弹窗，禁止页面滚动
+                DOM.loginMask.classList.remove('hidden');
+                document.body.classList.add('no-scroll');
+            }
+        }
+
+        // 工具函数 - 加载用户信息到页面
+        function loadUserInfoToPage() {
+            const userInfo = getUserInfo();
+            DOM.nicknameInput.value = userInfo.nickname || '';
+            DOM.qinnianIdInput.value = userInfo.qinnianId;
+        }
+
+        // 工具函数 - 检查密码修改是否在冷却期
+        function checkPwdModifyLimit() {
+            const lastModifyTime = localStorage.getItem(STORAGE_KEY.PWD_MODIFY_TIME);
+            if (!lastModifyTime) return true; // 从未修改过，允许修改
+
+            const lastTime = new Date(lastModifyTime).getTime();
+            const nowTime = new Date().getTime();
+            const oneMonth = 30 * 24 * 60 * 60 * 1000; // 30天毫秒数
+
+            return nowTime - lastTime >= oneMonth;
+        }
+
+        // 登录相关逻辑
+        // 监听协议勾选，控制登录按钮是否可用
+        DOM.agreementCheck.addEventListener('change', () => {
+            const isChecked = DOM.agreementCheck.checked;
+            const hasAccount = DOM.loginAccount.value.trim() !== '';
+            const hasPassword = DOM.loginPassword.value.trim() !== '';
+            DOM.loginSubmitBtn.disabled = !(isChecked && hasAccount && hasPassword);
+        });
+
+        // 监听账号密码输入，实时校验登录按钮状态
+        [DOM.loginAccount, DOM.loginPassword].forEach(input => {
+            input.addEventListener('input', () => {
+                const isChecked = DOM.agreementCheck.checked;
+                const hasAccount = DOM.loginAccount.value.trim() !== '';
+                const hasPassword = DOM.loginPassword.value.trim() !== '';
+                DOM.loginSubmitBtn.disabled = !(isChecked && hasAccount && hasPassword);
+            });
+        });
+
+        // 登录按钮点击事件
+        DOM.loginSubmitBtn.addEventListener('click', () => {
+            const account = DOM.loginAccount.value.trim();
+            const password = DOM.loginPassword.value.trim();
+
+            // 表单校验
+            if (!account) {
+                showToast('请输入账号', 'error');
+                return;
+            }
+            if (!password) {
+                showToast('请输入密码', 'error');
+                return;
+            }
+            if (!DOM.agreementCheck.checked) {
+                showToast('请先同意用户协议与隐私策略', 'error');
+                return;
+            }
+
+            // 保存用户信息与登录状态到本地存储
+            const existUserInfo = getUserInfo();
+            const newUserInfo = {
+                ...existUserInfo,
+                account: account,
+                password: password,
+                nickname: existUserInfo.nickname || account // 首次登录昵称默认用账号
+            };
+            saveUserInfo(newUserInfo);
+            localStorage.setItem(STORAGE_KEY.LOGIN_STATUS, 'true');
+
+            // 登录成功提示
+            showToast('登录成功，欢迎回来', 'success');
+
+            // 延迟执行，让提示框显示完成后再隐藏弹窗
+            setTimeout(() => {
+                DOM.loginMask.classList.add('hidden');
+                document.body.classList.remove('no-scroll');
+                loadUserInfoToPage();
+                // 清空登录表单
+                DOM.loginAccount.value = '';
+                DOM.loginPassword.value = '';
+                DOM.agreementCheck.checked = false;
+                DOM.loginSubmitBtn.disabled = true;
+            }, 800);
+        });
+
+        // 页面切换逻辑
+        // 账号按钮点击，切换到个人中心
+        DOM.accountBtn.addEventListener('click', () => {
+            DOM.homePage.classList.remove('active');
+            DOM.profilePage.classList.add('active');
+            loadUserInfoToPage(); // 每次进入都重新加载用户信息
+            // 重新触发个人中心动画
+            triggerProfileAnimations();
+        });
+
+        // 返回按钮点击，切换到首页
+        DOM.backBtn.addEventListener('click', () => {
+            DOM.profilePage.classList.remove('active');
+            DOM.homePage.classList.add('active');
+            // 重新触发首页卡片动画
+            triggerCardAnimations();
+        });
+
+        // 取消按钮点击，重置昵称输入框
+        DOM.cancelBtn.addEventListener('click', () => {
+            loadUserInfoToPage();
+            showToast('已取消修改', 'success');
+        });
+
+        // 保存按钮点击，保存昵称修改
+        DOM.saveBtn.addEventListener('click', () => {
+            const nickname = DOM.nicknameInput.value.trim();
+            // 校验昵称长度
+            if (nickname.length > 10) {
+                showToast('昵称不能超过10个字', 'error');
+                return;
+            }
+
+            // 保存到本地存储
+            const userInfo = getUserInfo();
+            userInfo.nickname = nickname;
+            saveUserInfo(userInfo);
+
+            showToast('昵称保存成功', 'success');
+        });
+
+        // 密码修改相关逻辑
+        // 修改密码按钮点击
+        DOM.modifyPwdBtn.addEventListener('click', () => {
+            // 检查修改次数限制
+            if (!checkPwdModifyLimit()) {
+                showToast('密码每月仅可修改一次，请下月再试', 'error');
+                return;
+            }
+            // 显示密码修改弹窗
+            DOM.passwordModalMask.classList.add('show');
+            // 清空输入框
+            DOM.oldPwdInput.value = '';
+            DOM.newPwdInput.value = '';
+            DOM.confirmPwdInput.value = '';
+        });
+
+        // 密码修改弹窗取消按钮
+        DOM.pwdCancelBtn.addEventListener('click', () => {
+            DOM.passwordModalMask.classList.remove('show');
+        });
+
+        // 密码修改弹窗确认按钮
+        DOM.pwdConfirmBtn.addEventListener('click', () => {
+            const oldPwd = DOM.oldPwdInput.value.trim();
+            const newPwd = DOM.newPwdInput.value.trim();
+            const confirmPwd = DOM.confirmPwdInput.value.trim();
+            const userInfo = getUserInfo();
+
+            // 表单校验
+            if (!oldPwd) {
+                showToast('请输入原密码', 'error');
+                return;
+            }
+            if (oldPwd !== userInfo.password) {
+                showToast('原密码输入错误', 'error');
+                return;
+            }
+            if (!newPwd) {
+                showToast('请输入新密码', 'error');
+                return;
+            }
+            if (newPwd.length < 6) {
+                showToast('新密码长度不能少于6位', 'error');
+                return;
+            }
+            if (newPwd !== confirmPwd) {
+                showToast('两次输入的新密码不一致', 'error');
+                return;
+            }
+            if (newPwd === oldPwd) {
+                showToast('新密码不能与原密码相同', 'error');
+                return;
+            }
+
+            // 保存新密码
+            userInfo.password = newPwd;
+            saveUserInfo(userInfo);
+            // 保存修改时间
+            localStorage.setItem(STORAGE_KEY.PWD_MODIFY_TIME, new Date().toISOString());
+            // 关闭弹窗
+            DOM.passwordModalMask.classList.remove('show');
+            // 提示成功
+            showToast('密码修改成功，请牢记新密码', 'success');
+        });
+
+        // 退出登录按钮点击事件
+        DOM.logoutBtn.addEventListener('click', () => {
+            // 清除登录状态，保留用户信息，方便下次登录
+            localStorage.removeItem(STORAGE_KEY.LOGIN_STATUS);
+            showToast('已退出登录', 'success');
+            // 延迟刷新页面，回到登录状态
+            setTimeout(() => {
+                window.location.reload();
+            }, 800);
+        });
+
+        // 点击密码修改弹窗遮罩层，关闭弹窗
+        DOM.passwordModalMask.addEventListener('click', (e) => {
+            if (e.target === DOM.passwordModalMask) {
+                DOM.passwordModalMask.classList.remove('show');
+            }
+        });
+
+        // 辅助函数 - 重新触发首页卡片入场动画
+        function triggerCardAnimations() {
+            const cards = document.querySelectorAll('.content-card');
+            cards.forEach(card => {
+                card.style.animation = 'none';
+                card.offsetHeight; // 强制回流
+                card.style.animation = '';
+            });
+            // 重置标题下划线动画
+            const homeTitle = document.querySelector('.home-title');
+            if (homeTitle) {
+                homeTitle.style.animation = 'none';
+                homeTitle.offsetHeight;
+                homeTitle.style.animation = '';
+                const afterEl = homeTitle.querySelector('::after');
+            }
+            // 通过重新设置类来触发动画
+            const homePageEl = DOM.homePage;
+            homePageEl.classList.remove('active');
+            homePageEl.offsetHeight;
+            homePageEl.classList.add('active');
+        }
+
+        // 辅助函数 - 重新触发个人中心动画
+        function triggerProfileAnimations() {
+            const formItems = document.querySelectorAll('#profilePage .form-item');
+            formItems.forEach(item => {
+                item.style.animation = 'none';
+                item.offsetHeight;
+                item.style.animation = '';
+            });
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.style.animation = 'none';
+                logoutBtn.offsetHeight;
+                logoutBtn.style.animation = '';
+            }
+            const profileTitle = document.querySelector('.profile-title');
+            if (profileTitle) {
+                profileTitle.style.animation = 'none';
+                profileTitle.offsetHeight;
+                profileTitle.style.animation = '';
+            }
+            const btnGroup = document.querySelector('.profile-btn-group');
+            if (btnGroup) {
+                btnGroup.style.animation = 'none';
+                btnGroup.offsetHeight;
+                btnGroup.style.animation = '';
+            }
+        }
+
+        // 页面加载完成后，初始化检查登录状态
+        window.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+        });
+
+        // 禁止未登录时通过F12修改元素隐藏弹窗，实时监听登录状态
+        setInterval(() => {
+            const isLogin = localStorage.getItem(STORAGE_KEY.LOGIN_STATUS) === 'true';
+            if (!isLogin) {
+                DOM.loginMask.classList.remove('hidden');
+                document.body.classList.add('no-scroll');
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

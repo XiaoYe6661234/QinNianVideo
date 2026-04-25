@@ -12,6 +12,38 @@
             padding: 0;
             box-sizing: border-box;
             font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            /* 全局禁止长按弹出菜单（iOS）和选择文本 */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* 输入框和文本域恢复文本选择能力 */
+        input,
+        textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+            -webkit-touch-callout: default;
+        }
+
+        /* 图片全局禁止长按下载 */
+        img {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            pointer-events: auto;
+            /* 保持可点击，但禁止拖拽 */
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
         }
 
         :root {
@@ -20,13 +52,17 @@
             --border-red: #ff3b4e;
             --text-main: #333333;
             --text-white: #ffffff;
+            --text-pink: #ff4088;
             --bg-white: #ffffff;
             --mask-bg: rgba(0, 0, 0, 0.6);
             --transition-normal: all 0.3s ease;
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             --border-radius-normal: 8px;
             --border-radius-round: 50%;
+            --border-radius-card: 12px;
             --header-height: 100px;
             --header-height-mobile: 80px;
+            --nav-indicator-height: 3px;
         }
 
         html,
@@ -60,6 +96,15 @@
             left: 0;
             z-index: 100;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            gap: 20px;
+        }
+
+        /* 左侧区域：logo + 导航标签 */
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            flex-shrink: 0;
         }
 
         .logo {
@@ -81,6 +126,69 @@
                 opacity: 1;
                 transform: translateX(0);
             }
+        }
+
+        /* 导航标签容器 */
+        .nav-tabs {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        /* 导航标签按钮 */
+        .nav-tab {
+            font-size: 20px;
+            font-weight: 500;
+            color: #888888;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 20px;
+            position: relative;
+            transition: color 0.35s ease;
+            letter-spacing: 1px;
+            outline: none;
+            white-space: nowrap;
+            z-index: 2;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        .nav-tab:hover {
+            color: #ffb6c1;
+        }
+
+        .nav-tab:active {
+            transform: scale(0.96);
+            transition: transform 0.15s ease;
+        }
+
+        /* 激活状态的导航标签 */
+        .nav-tab.active {
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+
+        /* 导航下划线指示器 - 滑动动画 */
+        .nav-indicator {
+            position: absolute;
+            bottom: -2px;
+            height: var(--nav-indicator-height);
+            background-color: var(--border-red);
+            border-radius: 2px;
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .nav-indicator.visible {
+            opacity: 1;
         }
 
         /* 右侧容器：账号按钮 + 昵称 */
@@ -113,6 +221,8 @@
             animation: accountPulse 2.5s ease-in-out infinite;
             padding: 0;
             line-height: 1;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         @keyframes accountPulse {
@@ -145,6 +255,9 @@
             position: absolute;
             top: 0;
             left: 0;
+            -webkit-user-drag: none;
+            user-drag: none;
+            -webkit-touch-callout: none;
         }
 
         .account-avatar.visible {
@@ -202,7 +315,7 @@
             }
         }
 
-        /* 首页样式 */
+        /* 首页样式 - 视频卡片页 */
         .home-title {
             font-size: 32px;
             font-weight: 600;
@@ -265,6 +378,7 @@
             opacity: 0;
             animation: cardFadeInUp 0.55s ease forwards;
             animation-delay: 0.05s;
+            cursor: pointer;
         }
 
         @keyframes cardFadeInUp {
@@ -302,6 +416,9 @@
             display: block;
             background-color: #f5f5f5;
             transition: transform 0.4s ease;
+            -webkit-user-drag: none;
+            user-drag: none;
+            -webkit-touch-callout: none;
         }
 
         .content-card:hover .card-cover {
@@ -318,6 +435,233 @@
 
         .content-card:hover .card-title {
             color: var(--accent-red);
+        }
+
+        /* ========== 图文页面样式（小红书/快手/抖音风格 上图下文 瀑布流） ========== */
+        .gallery-title {
+            font-size: 32px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+            animation: titleFadeIn 0.6s ease forwards;
+        }
+
+        .gallery-title::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--border-red);
+            border-radius: 2px;
+            animation: underlineExpand 0.7s ease forwards;
+            transform-origin: left center;
+        }
+
+        /* 瀑布流容器 - 使用CSS columns实现 */
+        .waterfall-container {
+            width: 100%;
+            column-count: 5;
+            column-gap: 18px;
+            padding: 0;
+        }
+
+        /* 瀑布流卡片 */
+        .waterfall-item {
+            break-inside: avoid;
+            margin-bottom: 18px;
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-card);
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
+            color: var(--text-main);
+            opacity: 0;
+            animation: waterfallFadeIn 0.5s ease forwards;
+            animation-delay: calc(var(--delay, 0) * 0.04s);
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes waterfallFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .waterfall-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 28px rgba(255, 59, 78, 0.2);
+        }
+
+        .waterfall-item:active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(255, 59, 78, 0.15);
+        }
+
+        /* 图文卡片图片容器 */
+        .waterfall-img-wrap {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            background-color: #f5f5f5;
+            display: block;
+        }
+
+        .waterfall-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.45s ease;
+            -webkit-user-drag: none;
+            user-drag: none;
+            -webkit-touch-callout: none;
+            background-color: #f5f5f5;
+        }
+
+        .waterfall-item:hover .waterfall-img {
+            transform: scale(1.06);
+        }
+
+        /* 图片上的渐变遮罩（底部） */
+        .waterfall-img-gradient {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0));
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            z-index: 2;
+        }
+
+        .waterfall-item:hover .waterfall-img-gradient {
+            opacity: 1;
+        }
+
+        /* 图文卡片底部的文字区域 */
+        .waterfall-text-area {
+            padding: 12px 14px 14px;
+            position: relative;
+            z-index: 3;
+            background-color: #fff;
+        }
+
+        .waterfall-title {
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.5;
+            color: #333;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.3s ease;
+            margin-bottom: 6px;
+        }
+
+        .waterfall-item:hover .waterfall-title {
+            color: var(--accent-red);
+        }
+
+        /* 底部互动信息行 */
+        .waterfall-meta {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 12px;
+            color: #999;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .waterfall-meta-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-style: normal;
+        }
+
+        .waterfall-meta-icon.heart {
+            color: #ff6b81;
+        }
+
+        .waterfall-meta-icon.heart::before {
+            content: "♥";
+            font-size: 13px;
+        }
+
+        .waterfall-meta-icon.comment::before {
+            content: "💬";
+            font-size: 11px;
+        }
+
+        .waterfall-meta-icon.share::before {
+            content: "↗";
+            font-size: 12px;
+        }
+
+        /* 图文卡片角标（热门/精选） */
+        .waterfall-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #ff5c6c, #ff3b4e);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            z-index: 5;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(255, 59, 78, 0.35);
+            opacity: 0;
+            transform: translateY(-6px);
+            transition: all 0.35s ease;
+        }
+
+        .waterfall-item:hover .waterfall-badge {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .waterfall-badge.hot {
+            background: linear-gradient(135deg, #ff6b3d, #ff3b4e);
+        }
+
+        .waterfall-badge.new {
+            background: linear-gradient(135deg, #6bc5ff, #3b8bff);
+        }
+
+        /* 图文加载占位闪烁动画 */
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .waterfall-img-placeholder {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.6s ease-in-out infinite;
         }
 
         /* 个人中心页面样式 */
@@ -359,6 +703,8 @@
             color: var(--text-main);
             cursor: pointer;
             transition: var(--transition-normal);
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .profile-btn:hover {
@@ -392,6 +738,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .avatar-preview-wrapper:hover {
@@ -410,6 +757,9 @@
             object-fit: cover;
             display: none;
             border-radius: var(--border-radius-round);
+            -webkit-user-drag: none;
+            user-drag: none;
+            -webkit-touch-callout: none;
         }
 
         .avatar-preview-img.visible {
@@ -486,6 +836,8 @@
             color: var(--text-main);
             outline: none;
             transition: var(--transition-normal);
+            -webkit-user-select: text;
+            user-select: text;
         }
 
         .form-input:focus {
@@ -519,6 +871,8 @@
             cursor: pointer;
             white-space: nowrap;
             transition: var(--transition-normal);
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .modify-btn:hover {
@@ -546,6 +900,8 @@
             opacity: 0;
             animation: formItemFadeIn 0.5s ease forwards;
             animation-delay: 0.34s;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .logout-btn:hover {
@@ -609,6 +965,9 @@
             object-fit: contain;
             user-select: none;
             animation: idolBreath 3.5s ease-in-out infinite;
+            -webkit-user-drag: none;
+            user-drag: none;
+            -webkit-touch-callout: none;
         }
 
         @keyframes idolBreath {
@@ -654,6 +1013,8 @@
             color: var(--text-main);
             outline: none;
             transition: var(--transition-normal);
+            -webkit-user-select: text;
+            user-select: text;
         }
 
         .login-form-input:focus {
@@ -674,6 +1035,8 @@
             transition: var(--transition-normal);
             position: relative;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .login-submit-btn:hover {
@@ -810,6 +1173,8 @@
             font-weight: 500;
             cursor: pointer;
             transition: var(--transition-normal);
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         .btn-cancel {
@@ -828,6 +1193,23 @@
 
         .btn-confirm:hover {
             background-color: #ffc0cb;
+        }
+
+        /* ========== 响应式适配 - 大屏平板端（图文瀑布流4列） ========== */
+        @media screen and (max-width: 1400px) {
+            .waterfall-container {
+                column-count: 4;
+                column-gap: 16px;
+            }
+            .waterfall-item {
+                margin-bottom: 16px;
+            }
+            .waterfall-title {
+                font-size: 14px;
+            }
+            .waterfall-text-area {
+                padding: 10px 12px 12px;
+            }
         }
 
         /* 响应式适配 - 平板端 */
@@ -850,6 +1232,16 @@
             header {
                 padding: 0 30px;
                 height: 90px;
+                gap: 15px;
+            }
+
+            .header-left {
+                gap: 20px;
+            }
+
+            .nav-tab {
+                font-size: 18px;
+                padding: 6px 16px;
             }
 
             :root {
@@ -883,13 +1275,40 @@
                     box-shadow: 0 0 0 8px rgba(255, 92, 108, 0);
                 }
             }
+
+            .waterfall-container {
+                column-count: 3;
+                column-gap: 14px;
+            }
+            .waterfall-item {
+                margin-bottom: 14px;
+            }
+            .waterfall-title {
+                font-size: 13px;
+            }
+            .waterfall-text-area {
+                padding: 9px 10px 11px;
+            }
+            .waterfall-meta {
+                font-size: 11px;
+                gap: 10px;
+            }
+            .gallery-title {
+                font-size: 26px;
+                margin-bottom: 24px;
+            }
+            .home-title {
+                font-size: 26px;
+                margin-bottom: 24px;
+            }
         }
 
         /* 响应式适配 - 手机端 */
         @media screen and (max-width: 768px) {
             header {
                 height: var(--header-height-mobile);
-                padding: 0 20px;
+                padding: 0 15px;
+                gap: 8px;
             }
 
             :root {
@@ -901,13 +1320,23 @@
             }
 
             .logo {
-                font-size: 36px;
+                font-size: 30px;
+            }
+
+            .header-left {
+                gap: 10px;
+            }
+
+            .nav-tab {
+                font-size: 15px;
+                padding: 5px 10px;
+                letter-spacing: 0.5px;
             }
 
             .account-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 12px;
+                width: 38px;
+                height: 38px;
+                font-size: 11px;
                 animation: accountPulseMobile 2.5s ease-in-out infinite;
             }
 
@@ -922,32 +1351,36 @@
             }
 
             .user-nickname {
-                font-size: 11px;
-                max-width: 60px;
+                font-size: 10px;
+                max-width: 50px;
             }
 
             .header-right {
-                gap: 3px;
+                gap: 2px;
             }
 
             .page-container {
-                padding: 20px;
+                padding: 16px;
                 min-height: calc(100vh - var(--header-height-mobile));
             }
 
             .home-title {
-                font-size: 24px;
-                margin-bottom: 20px;
+                font-size: 22px;
+                margin-bottom: 18px;
+            }
+            .gallery-title {
+                font-size: 22px;
+                margin-bottom: 18px;
             }
 
             .card-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 18px;
+                gap: 14px;
             }
 
             .card-title {
-                font-size: 16px;
-                padding: 10px 8px;
+                font-size: 14px;
+                padding: 8px 6px;
             }
 
             .content-card:nth-child(n+3):nth-child(-n+4) {
@@ -958,6 +1391,34 @@
             }
             .content-card:nth-child(n+7) {
                 animation-delay: 0.38s;
+            }
+
+            /* 图文瀑布流手机端双列 */
+            .waterfall-container {
+                column-count: 2;
+                column-gap: 10px;
+            }
+            .waterfall-item {
+                margin-bottom: 10px;
+                border-radius: 10px;
+            }
+            .waterfall-title {
+                font-size: 12px;
+                -webkit-line-clamp: 2;
+            }
+            .waterfall-text-area {
+                padding: 8px 9px 10px;
+            }
+            .waterfall-meta {
+                font-size: 10px;
+                gap: 8px;
+            }
+            .waterfall-badge {
+                font-size: 10px;
+                padding: 3px 8px;
+                top: 6px;
+                left: 6px;
+                border-radius: 10px;
             }
 
             .profile-title {
@@ -1038,27 +1499,54 @@
             .agreement-text {
                 font-size: 14px;
             }
+
+            .nav-indicator {
+                height: 2px;
+                bottom: -1px;
+            }
         }
 
         /* 超小屏手机适配 */
         @media screen and (max-width: 380px) {
             .card-grid {
-                gap: 15px;
+                gap: 10px;
+            }
+            .waterfall-container {
+                column-gap: 8px;
+            }
+            .waterfall-item {
+                margin-bottom: 8px;
+            }
+            .waterfall-title {
+                font-size: 11px;
+            }
+            .waterfall-text-area {
+                padding: 6px 7px 8px;
             }
 
             .account-btn {
-                width: 36px;
-                height: 36px;
-                font-size: 11px;
+                width: 34px;
+                height: 34px;
+                font-size: 10px;
             }
 
             .user-nickname {
-                font-size: 10px;
-                max-width: 50px;
+                font-size: 9px;
+                max-width: 42px;
             }
 
             .header-right {
-                gap: 2px;
+                gap: 1px;
+            }
+            .header-left {
+                gap: 6px;
+            }
+            .logo {
+                font-size: 26px;
+            }
+            .nav-tab {
+                font-size: 13px;
+                padding: 4px 7px;
             }
 
             .modal-right {
@@ -1087,6 +1575,12 @@
                     box-shadow: 0 0 0 6px rgba(255, 92, 108, 0);
                 }
             }
+
+            .gallery-title,
+            .home-title {
+                font-size: 19px;
+                margin-bottom: 14px;
+            }
         }
     </style>
 </head>
@@ -1096,165 +1590,519 @@
 
     <!-- 顶部导航栏 - 固定定位 -->
     <header>
-        <div class="logo">QinNian</div>
+        <div class="header-left">
+            <div class="logo">QinNian</div>
+            <!-- 导航标签：首页 & 图文 -->
+            <nav class="nav-tabs" id="navTabs" aria-label="主导航">
+                <button class="nav-tab active" data-tab="home" id="navTabHome" aria-current="page">视频</button>
+                <button class="nav-tab" data-tab="gallery" id="navTabGallery">图文</button>
+                <span class="nav-indicator visible" id="navIndicator"></span>
+            </nav>
+        </div>
         <div class="header-right">
             <button class="account-btn" id="accountBtn" title="个人中心">
-                <img class="account-avatar" id="accountAvatar" src="" alt="头像">
+                <img class="account-avatar" id="accountAvatar" src="" alt="头像" draggable="false">
                 <span class="account-text" id="accountText">账号</span>
             </button>
             <span class="user-nickname" id="headerNickname"></span>
         </div>
     </header>
 
-    <!-- 首页容器 -->
+    <!-- 首页容器 - 视频卡片页 -->
     <div class="page-container active" id="homePage">
-        <h2 class="home-title">首页</h2>
+        <h2 class="home-title">▶️ 精选视频</h2>
         <div class="card-grid">
             <!-- 卡片1 -->
             <a href="./video1.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover1.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover1.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">鸟儿摇</div>
             </a>
             <!-- 卡片2 -->
             <a href="./video2.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover2.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover2.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">发牌</div>
             </a>
             <!-- 卡片3 -->
             <a href="./video3.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover3.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover3.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">扭胯舞</div>
             </a>
             <!-- 卡片4 -->
             <a href="./video4.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover4.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover4.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">辛巴巴巴鲁比拉</div>
             </a>
             <!-- 卡片5 -->
             <a href="./video5.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover5.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover5.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">知道犯什么事了吗？</div>
             </a>
             <!-- 卡片6 -->
             <a href="./video6.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover6.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover6.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">高雅人士</div>
             </a>
             <!-- 卡片7 -->
             <a href="./video7.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover7.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover7.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">毋庸置疑</div>
             </a>
             <!-- 卡片8 -->
             <a href="./video8.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover8.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover8.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">细腻的稀饭</div>
             </a>
             <!-- 卡片9 -->
             <a href="./video9.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover9.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover9.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">覃念你不乘哦</div>
             </a>
             <!-- 卡片10 -->
             <a href="./video10.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover10.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover10.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">覃念骑北极熊</div>
             </a>
             <!-- 卡片11 -->
             <a href="./video11.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover11.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover11.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">如何呢？又能怎？</div>
             </a>
             <!-- 卡片12 -->
             <a href="./video12.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover12.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover12.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">覃念背着我们...</div>
             </a>
             <!-- 卡片13 -->
             <a href="./video13.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover13.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover13.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">人类高质量覃念</div>
             </a>
             <!-- 卡片14 -->
             <a href="./video14.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover14.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover14.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">埃及摇</div>
             </a>
             <!-- 卡片15 -->
             <a href="./video15.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover15.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover15.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">覃念吃播</div>
             </a>
             <!-- 卡片16 -->
             <a href="./video16.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover16.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover16.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">覃念打金服</div>
             </a>
             <!-- 卡片17 -->
             <a href="./video17.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover17.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover17.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">欢迎来到渣男团</div>
             </a>
             <!-- 卡片18 -->
             <a href="./video18.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover18.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover18.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">凌驾-新</div>
             </a>
             <!-- 卡片19 -->
             <a href="./video19.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover19.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover19.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">我找茬都说不出这种话</div>
             </a>
             <!-- 卡片20 -->
             <a href="./video20.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover20.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover20.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">聆听</div>
             </a>
             <!-- 卡片21 -->
             <a href="./video21.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover21.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover21.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">独攀</div>
             </a>
             <!-- 卡片22 -->
             <a href="./video22.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover22.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover22.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">神秘进行曲</div>
             </a>
             <!-- 卡片23 -->
             <a href="./video23.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover23.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover23.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">覃念，你更喜欢谁？</div>
             </a>
             <!-- 卡片24 -->
             <a href="./video24.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover24.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover24.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">急急那如律令</div>
             </a>
             <!-- 卡片25 -->
             <a href="./video25.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover25.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover25.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">奶龙大笑</div>
             </a>
             <!-- 卡片26 -->
             <a href="./video26.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover26.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover26.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">燃烧我的卡路里</div>
             </a>
             <!-- 卡片27 -->
             <a href="./video27.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover27.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover27.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">跳跃不是罪过</div>
             </a>
             <!-- 卡片28 -->
             <a href="./video28.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover28.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover28.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">椰汁</div>
             </a>
             <!-- 卡片29 -->
             <a href="./video29.html" class="content-card">
-                <img src="https://xiaoye6661234.github.io/images/cover29.png" alt="视频封面" class="card-cover">
+                <img src="https://xiaoye6661234.github.io/images/cover29.png" alt="视频封面" class="card-cover" draggable="false">
                 <div class="card-title">老梗-kun</div>
             </a>
+        </div>
+    </div>
+
+    <!-- 图文页面容器 - 小红书/快手/抖音风格瀑布流 -->
+    <div class="page-container" id="galleryPage">
+        <h2 class="gallery-title">📸 图文动态</h2>
+        <div class="waterfall-container" id="waterfallContainer">
+            <!-- 图文1 -->
+            <div class="waterfall-item" style="--delay: 0;">
+                <span class="waterfall-badge hot">🔥热门</span>
+                <div class="waterfall-img-wrap" style="height: 280px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p1.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">我去，不早说，覃念家的疏导就是专业！爱了爱了，已经预约91年了，希望下次服务态度可以好一点，老是喜欢骂我。</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">38.2w</span>
+                        <span class="waterfall-meta-icon comment">1.8k</span>
+                        <span class="waterfall-meta-icon share">666k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文2 -->
+            <div class="waterfall-item" style="--delay: 1;">
+                <div class="waterfall-img-wrap" style="height: 220px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p2.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title"> 覃念这波操作谁顶得住啊，气场全开～爱了爱了！</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">42.7w</span>
+                        <span class="waterfall-meta-icon comment">1.2w</span>
+                        <span class="waterfall-meta-icon share">489w</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文3 -->
+            <div class="waterfall-item" style="--delay: 2;">
+                <span class="waterfall-badge new">✨新发</span>
+                <div class="waterfall-img-wrap" style="height: 320px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p3.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">假如秦始皇是覃念会怎么样？那应该不只是暴政这么简单了。。。</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">5.6w</span>
+                        <span class="waterfall-meta-icon comment">3.4k</span>
+                        <span class="waterfall-meta-icon share">1.5k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文4 -->
+            <div class="waterfall-item" style="--delay: 3;">
+                <div class="waterfall-img-wrap" style="height: 250px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p4.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">你已急哭，👽：收到</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">4.1w</span>
+                        <span class="waterfall-meta-icon comment">2.0k</span>
+                        <span class="waterfall-meta-icon share">932</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文5 -->
+            <div class="waterfall-item" style="--delay: 4;">
+                <span class="waterfall-badge hot">🔥热门</span>
+                <div class="waterfall-img-wrap" style="height: 300px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p5.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">颗秒，哈哈哈哈，难道他真的是赋能哥？帮帮帮帮！ </div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">8.3w</span>
+                        <span class="waterfall-meta-icon comment">5.7k</span>
+                        <span class="waterfall-meta-icon share">2.8k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文6 -->
+            <div class="waterfall-item" style="--delay: 5;">
+                <div class="waterfall-img-wrap" style="height: 210px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p6.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">气质这块拿捏得死死的，绝美颜值暴击！</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">3.5w</span>
+                        <span class="waterfall-meta-icon comment">1.6k</span>
+                        <span class="waterfall-meta-icon share">720</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文7 -->
+            <div class="waterfall-item" style="--delay: 6;">
+                <div class="waterfall-img-wrap" style="height: 340px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p7.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">清场大甩卖，覃念只需0.01¥即可带回家！</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">6.9w</span>
+                        <span class="waterfall-meta-icon comment">4.1k</span>
+                        <span class="waterfall-meta-icon share">1.9k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文8 -->
+            <div class="waterfall-item" style="--delay: 7;">
+                <span class="waterfall-badge new">✨新发</span>
+                <div class="waterfall-img-wrap" style="height: 230px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p8.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">在古代，穷人拥有一个覃念能有多爽！覃念之乐，阿九穷得只有半床破絮，却整日笑呵呵的。他的覃念能让他看见石头的纹路里淌着江河，听见蚂蚁在讨论天地的奥秘。当富户朱门紧闭时，他正躺在山坡上，任覃念化作彩蝶，与流云共舞。饥饿时，覃念便成了最香甜的炊饼；寒冷时，便是最暖的裘衣。原来，最珍贵的富足不在钱袋里，而在那颗能化芥子为须弥的心里。</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">2.1w</span>
+                        <span class="waterfall-meta-icon comment">980</span>
+                        <span class="waterfall-meta-icon share">345</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文9 -->
+            <div class="waterfall-item" style="--delay: 8;">
+                <div class="waterfall-img-wrap" style="height: 270px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p9.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">我在博物馆里面看到了覃念！</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">3.9w</span>
+                        <span class="waterfall-meta-icon comment">2.3k</span>
+                        <span class="waterfall-meta-icon share">1.1k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文10 -->
+            <div class="waterfall-item" style="--delay: 9;">
+                <span class="waterfall-badge hot">🔥热门</span>
+                <div class="waterfall-img-wrap" style="height: 360px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p10.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">覃念霸道总裁这一块/.<br>
+阿九穷得叮当响，可覃念一来，他瞬间成了全城最拽的人。<br>
+“天凉了，让王家破产吧。”他躺在草席上淡淡开口。覃念化作冷面霸总，修长手指轻扣破碗沿，低沉嗓音在脑海回响：“你这辈子被我承包了。”<br>
+连村头翠花路过，阿九的覃念霸道总裁立刻替他把人壁咚在歪墙边：“女人，你成功引起了我的注意。”<br>
+翠花吓得拔腿就跑。<br>
+阿九满意地裹紧破棉袄——当穷人的快乐，就是一分钱不花，也能把霸总瘾过足。</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">7.5w</span>
+                        <span class="waterfall-meta-icon comment">6.0k</span>
+                        <span class="waterfall-meta-icon share">3.2k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文11 -->
+            <div class="waterfall-item" style="--delay: 10;">
+                <div class="waterfall-img-wrap" style="height: 195px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p11.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">覃念手办收到了，很满意，与设计图一模一样，没毛病！</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">1.8w</span>
+                        <span class="waterfall-meta-icon comment">756</span>
+                        <span class="waterfall-meta-icon share">290</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文12 -->
+            <div class="waterfall-item" style="--delay: 11;">
+                <div class="waterfall-img-wrap" style="height: 310px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p12.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">我在美国看到了覃念！<br>
+我在纽约第五大道看见覃念时，它正蹲在川菜馆门口剥蒜。
+“嘘——”它朝我挤挤眼，“别让阿九知道我溜出来旅游了。”
+这个从阿九破棉袄里逃逸出来的覃念，此刻穿着自由女神同款长袍，用霸总口吻对流浪猫说：“这片街区，我罩了。”
+它带我逛唐人街时，突然叹气：“美国好是好，可惜没人需要我帮他们幻想白面馒头了。”说着从兜里掏出一把蒜瓣，“喏，给你，阿九说蒜瓣揣兜里，走路带风，跟霸总系领带一个效果。”
+我接过蒜瓣，忽然明白——覃念飘得再远，根还扎在那个山坡上，扎在阿九那半床破絮里。
+原来全世界的穷开心，都是同一种富足。
+                    </div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">4.8w</span>
+                        <span class="waterfall-meta-icon comment">3.0k</span>
+                        <span class="waterfall-meta-icon share">1.4k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文13 -->
+            <div class="waterfall-item" style="--delay: 12;">
+                <span class="waterfall-badge hot">🔥热门</span>
+                <div class="waterfall-img-wrap" style="height: 260px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p13.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">看看我的新作品，雪中覃念，爱了吗？</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">9.1w</span>
+                        <span class="waterfall-meta-icon comment">7.2k</span>
+                        <span class="waterfall-meta-icon share">4.0k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文14 -->
+            <div class="waterfall-item" style="--delay: 13;">
+                <div class="waterfall-img-wrap" style="height: 240px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p14.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">覃念一觉醒来头撞到天花板，惊恐地发现家具都在脚踝边。她成了巨人，却打不开变小的房门。好不容易挤出门，低头一看——不是她变大了，是全城人都缩小了。只有她记得，早餐还是焦了。</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">3.3w</span>
+                        <span class="waterfall-meta-icon comment">1.5k</span>
+                        <span class="waterfall-meta-icon share">680</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文15 -->
+            <div class="waterfall-item" style="--delay: 14;">
+                <span class="waterfall-badge new">✨新发</span>
+                <div class="waterfall-img-wrap" style="height: 350px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p15.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">覃念拧开瓶盖的瞬间，整条街的冰红茶破空而来，在她掌心凝成寒冰长枪。她立于便利店屋顶，看着对面奶茶店。全糖战神，加冰。她摇摇头，把珍珠弹了出去。</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">6.2w</span>
+                        <span class="waterfall-meta-icon comment">4.8k</span>
+                        <span class="waterfall-meta-icon share">2.3k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文16 -->
+            <div class="waterfall-item" style="--delay: 15;">
+                <div class="waterfall-img-wrap" style="height: 200px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p16.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">覃念低头看见长发垂落，又摸了摸胸口——完了，真变了。队友发来游戏邀请，她犹豫三秒，还是点了接受。开麦瞬间，对面沉默，然后听见一声颤抖的：“兄弟……你开变声器了？”她淡定敲字：不是变声器，是变异。</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">2.5w</span>
+                        <span class="waterfall-meta-icon comment">1.1k</span>
+                        <span class="waterfall-meta-icon share">520</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文17 -->
+            <div class="waterfall-item" style="--delay: 16;">
+                <div class="waterfall-img-wrap" style="height: 290px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p17.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">他走到哪，头顶就飘到哪一朵小乌云，不大不小，刚好淋湿自己。别人问怎么了，她张了张嘴，雨就更大了一点。对面楼顶也有朵乌云，那人冲她点了点头。忧郁也是会传染的，但两个忧郁的人对上视线，反而出了三秒太阳。</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">5.0w</span>
+                        <span class="waterfall-meta-icon comment">3.6k</span>
+                        <span class="waterfall-meta-icon share">1.7k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文18 -->
+            <div class="waterfall-item" style="--delay: 17;">
+                <span class="waterfall-badge hot">🔥热门</span>
+                <div class="waterfall-img-wrap" style="height: 330px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p18.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">新买的覃念挂件到了！亚克力的</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">7.8w</span>
+                        <span class="waterfall-meta-icon comment">5.5k</span>
+                        <span class="waterfall-meta-icon share">3.6k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文19 -->
+            <div class="waterfall-item" style="--delay: 18;">
+            
+                <div class="waterfall-img-wrap" style="height: 215px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p19.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">谁懂这个颜色！</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">4.4w</span>
+                        <span class="waterfall-meta-icon comment">2.7k</span>
+                        <span class="waterfall-meta-icon share">1.2k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文20 -->
+            <div class="waterfall-item" style="--delay: 19;">
+                <span class="waterfall-badge new">✨新发</span>
+                <div class="waterfall-img-wrap" style="height: 370px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p20.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">黄鹤一去不复返，白云千载空悠悠。晴川历历汉阳树，芳草萋萋鹦鹉洲。日暮乡关何处是？烟波江上使人愁。</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">8.7w</span>
+                        <span class="waterfall-meta-icon comment">6.3k</span>
+                        <span class="waterfall-meta-icon share">4.5k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 图文21 -->
+            <div class="waterfall-item" style="--delay: 20;">
+                <div class="waterfall-img-wrap" style="height: 245px;">
+                    <img src="https://xiaoye6661234.github.io/picture/p21.png" alt="图文" class="waterfall-img" draggable="false" loading="lazy">
+                    <div class="waterfall-img-gradient"></div>
+                </div>
+                <div class="waterfall-text-area">
+                    <div class="waterfall-title">净身房的白布掀开那刻，覃念睁眼却看见天花板日光灯。他摸向空荡荡的袍子下摆，同屋的研究员热烈鼓掌：“恭喜，你是第一个穿越回来的太监！”覃念攥紧床单：“那我的……”“放心，留大明朝了。”</div>
+                    <div class="waterfall-meta">
+                        <span class="waterfall-meta-icon heart">3.0w</span>
+                        <span class="waterfall-meta-icon comment">1.3k</span>
+                        <span class="waterfall-meta-icon share">560</span>
+                    </div>
+                </div>
+            
+           
+            </div>
         </div>
     </div>
 
@@ -1271,7 +2119,7 @@
         <div class="avatar-form-item">
             <label class="form-label">头像:</label>
             <div class="avatar-preview-wrapper" id="avatarPreviewWrapper" title="点击上传头像">
-                <img class="avatar-preview-img" id="avatarPreviewImg" src="" alt="头像预览">
+                <img class="avatar-preview-img" id="avatarPreviewImg" src="" alt="头像预览" draggable="false">
                 <span class="avatar-placeholder" id="avatarPlaceholder">点击<br>上传</span>
             </div>
             <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
@@ -1306,7 +2154,7 @@
     <div class="login-mask" id="loginMask">
         <div class="login-modal">
             <div class="modal-left">
-                <img src="https://xiaoye6661234.github.io/images/QinNian.png" alt="QinNian" class="modal-idol-img">
+                <img src="https://xiaoye6661234.github.io/images/QinNian.png" alt="QinNian" class="modal-idol-img" draggable="false">
             </div>
             <div class="modal-right">
                 <h2 class="modal-title">登录/注册</h2>
@@ -1355,7 +2203,7 @@
     </div>
 
     <script>
-        // 全局DOM元素获取
+        // ========== 全局DOM元素获取 ==========
         const DOM = {
             // 登录相关
             loginMask: document.getElementById('loginMask'),
@@ -1366,9 +2214,15 @@
             loginSubmitBtn: document.getElementById('loginSubmitBtn'),
             // 页面切换相关
             homePage: document.getElementById('homePage'),
+            galleryPage: document.getElementById('galleryPage'),
             profilePage: document.getElementById('profilePage'),
             accountBtn: document.getElementById('accountBtn'),
             backBtn: document.getElementById('backBtn'),
+            // 导航标签相关
+            navTabs: document.getElementById('navTabs'),
+            navTabHome: document.getElementById('navTabHome'),
+            navTabGallery: document.getElementById('navTabGallery'),
+            navIndicator: document.getElementById('navIndicator'),
             // 个人中心相关
             nicknameInput: document.getElementById('nicknameInput'),
             qinnianIdInput: document.getElementById('qinnianIdInput'),
@@ -1400,7 +2254,8 @@
         const STORAGE_KEY = {
             LOGIN_STATUS: 'qinnian_login_status',
             USER_INFO: 'qinnian_user_info',
-            PWD_MODIFY_TIME: 'qinnian_pwd_modify_time'
+            PWD_MODIFY_TIME: 'qinnian_pwd_modify_time',
+            ACTIVE_TAB: 'qinnian_active_tab'
         };
 
         // 邀请码常量
@@ -1409,7 +2264,155 @@
         // 头像缩放最大尺寸
         const AVATAR_MAX_SIZE = 200;
 
-        // 工具函数 - 提示框
+        // 当前激活的主页标签（'home' 或 'gallery'）
+        let currentActiveTab = 'home';
+
+        // ========== 全局禁止操作：长按下载图片 & 粘贴内容 ==========
+
+        /**
+         * 初始化全局防护：禁止右键菜单、禁止拖拽图片、禁止非输入框粘贴
+         */
+        function initGlobalProtection() {
+            // 1. 禁止右键菜单（全局）
+            document.addEventListener('contextmenu', function(e) {
+                // 如果目标是图片，坚决阻止右键
+                if (e.target.tagName === 'IMG') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                // 对于其他元素也阻止，全面防护
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }, true); // 使用捕获阶段确保优先处理
+
+            // 2. 禁止拖拽（全局）- 阻止dragstart事件
+            document.addEventListener('dragstart', function(e) {
+                if (e.target.tagName === 'IMG') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }, true);
+
+            // 3. 禁止非输入框的粘贴操作
+            document.addEventListener('paste', function(e) {
+                const target = e.target;
+                const tagName = target.tagName.toLowerCase();
+                const isInput = tagName === 'input' || tagName === 'textarea';
+                const isContentEditable = target.isContentEditable || target.getAttribute('contenteditable') === 'true';
+
+                // 只允许input、textarea和contentEditable元素接收粘贴
+                if (!isInput && !isContentEditable) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // 静默阻止，不弹提示（避免干扰用户体验）
+                    return false;
+                }
+            }, true);
+
+            // 4. 移动端长按防护 - 阻止selectstart事件（防止选择文本触发图片保存）
+            document.addEventListener('selectstart', function(e) {
+                // 检查是否在输入框内
+                const target = e.target;
+                const tagName = target.tagName.toLowerCase();
+                const isInput = tagName === 'input' || tagName === 'textarea';
+                const isContentEditable = target.isContentEditable || target.getAttribute('contenteditable') === 'true';
+                if (!isInput && !isContentEditable) {
+                    // 如果选择范围内包含图片则阻止
+                    const selection = window.getSelection();
+                    if (selection && selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        const containsImage = range.cloneContents().querySelector('img');
+                        if (containsImage || e.target.tagName === 'IMG' || e.target.closest('img')) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                    // 非输入框全局阻止选择
+                    if (e.target.tagName === 'IMG' || e.target.closest('img')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+            }, false);
+
+            // 5. 移动端touchstart长按检测 - 对图片进行额外防护
+            let longPressTimer = null;
+            let longPressTriggered = false;
+
+            document.addEventListener('touchstart', function(e) {
+                longPressTriggered = false;
+                const target = e.target;
+                if (target.tagName === 'IMG' || target.closest('img')) {
+                    longPressTimer = setTimeout(function() {
+                        longPressTriggered = true;
+                        // 长按图片时清除任何可能的选中
+                        if (window.getSelection) {
+                            window.getSelection().removeAllRanges();
+                        }
+                        // 触发一个微小的震动反馈替代（不影响功能）
+                    }, 500);
+                }
+            }, { passive: false });
+
+            document.addEventListener('touchend', function() {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+                if (longPressTriggered && window.getSelection) {
+                    window.getSelection().removeAllRanges();
+                }
+            });
+
+            document.addEventListener('touchmove', function() {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            });
+
+            // 6. 防止通过打印或其他方式获取图片（额外防护层）
+            // 监听beforeprint也可以做处理，但这里保持图片可见性不变
+
+            // 7. 给所有现有img元素设置draggable="false"（动态添加）
+            document.querySelectorAll('img').forEach(function(img) {
+                img.setAttribute('draggable', 'false');
+                img.style.webkitUserDrag = 'none';
+                img.style.userDrag = 'none';
+            });
+
+            // 8. MutationObserver - 监听新增的img元素，自动添加防护属性
+            const imgObserver = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.tagName === 'IMG') {
+                            node.setAttribute('draggable', 'false');
+                            node.style.webkitUserDrag = 'none';
+                            node.style.userDrag = 'none';
+                        }
+                        // 检查新增节点的子元素中是否有img
+                        if (node.querySelectorAll) {
+                            node.querySelectorAll('img').forEach(function(img) {
+                                img.setAttribute('draggable', 'false');
+                                img.style.webkitUserDrag = 'none';
+                                img.style.userDrag = 'none';
+                            });
+                        }
+                    });
+                });
+            });
+            imgObserver.observe(document.body, { childList: true, subtree: true });
+
+            console.log('🛡️ 全局防护已启动：禁止长按下载图片、禁止右键、禁止非输入框粘贴、禁止拖拽图片');
+        }
+
+        // 页面加载时立即初始化防护
+        initGlobalProtection();
+
+        // ========== 工具函数 - 提示框 ==========
         function showToast(message, type = 'success') {
             DOM.toast.textContent = message;
             DOM.toast.className = `toast show ${type}`;
@@ -1418,7 +2421,7 @@
             }, 3000);
         }
 
-        // 工具函数 - 获取本地存储用户信息（localStorage持久化）
+        // ========== 工具函数 - 获取本地存储用户信息（localStorage持久化） ==========
         function getUserInfo() {
             const userInfo = localStorage.getItem(STORAGE_KEY.USER_INFO);
             return userInfo ? JSON.parse(userInfo) : {
@@ -1430,17 +2433,17 @@
             };
         }
 
-        // 工具函数 - 保存用户信息到本地存储
+        // ========== 工具函数 - 保存用户信息到本地存储 ==========
         function saveUserInfo(userInfo) {
             localStorage.setItem(STORAGE_KEY.USER_INFO, JSON.stringify(userInfo));
         }
 
-        // 工具函数 - 获取会话登录状态（sessionStorage，每次新会话需重新登录）
+        // ========== 工具函数 - 获取会话登录状态（sessionStorage，每次新会话需重新登录） ==========
         function getSessionLoginStatus() {
             return sessionStorage.getItem(STORAGE_KEY.LOGIN_STATUS) === 'true';
         }
 
-        // 工具函数 - 设置会话登录状态
+        // ========== 工具函数 - 设置会话登录状态 ==========
         function setSessionLoginStatus(status) {
             if (status) {
                 sessionStorage.setItem(STORAGE_KEY.LOGIN_STATUS, 'true');
@@ -1449,7 +2452,72 @@
             }
         }
 
-        // 工具函数 - 检查登录状态
+        // ========== 导航标签 - 下划线指示器位置更新 ==========
+        function updateNavIndicator(tabElement) {
+            if (!tabElement) return;
+            const navRect = DOM.navTabs.getBoundingClientRect();
+            const tabRect = tabElement.getBoundingClientRect();
+            const left = tabRect.left - navRect.left;
+            const width = tabRect.width;
+            DOM.navIndicator.style.left = left + 'px';
+            DOM.navIndicator.style.width = width + 'px';
+            DOM.navIndicator.classList.add('visible');
+        }
+
+        // ========== 导航标签 - 设置激活标签 ==========
+        function setActiveTab(tabName) {
+            currentActiveTab = tabName;
+            // 更新标签按钮状态
+            DOM.navTabHome.classList.remove('active');
+            DOM.navTabGallery.classList.remove('active');
+            DOM.navTabHome.removeAttribute('aria-current');
+            DOM.navTabGallery.removeAttribute('aria-current');
+
+            if (tabName === 'home') {
+                DOM.navTabHome.classList.add('active');
+                DOM.navTabHome.setAttribute('aria-current', 'page');
+                updateNavIndicator(DOM.navTabHome);
+                // 切换页面
+                DOM.galleryPage.classList.remove('active');
+                DOM.profilePage.classList.remove('active');
+                DOM.homePage.classList.add('active');
+                triggerCardAnimations();
+            } else if (tabName === 'gallery') {
+                DOM.navTabGallery.classList.add('active');
+                DOM.navTabGallery.setAttribute('aria-current', 'page');
+                updateNavIndicator(DOM.navTabGallery);
+                // 切换页面
+                DOM.homePage.classList.remove('active');
+                DOM.profilePage.classList.remove('active');
+                DOM.galleryPage.classList.add('active');
+                triggerWaterfallAnimations();
+            }
+            // 保存当前标签到sessionStorage
+            sessionStorage.setItem(STORAGE_KEY.ACTIVE_TAB, tabName);
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ========== 导航标签点击事件 ==========
+        DOM.navTabHome.addEventListener('click', function() {
+            if (currentActiveTab === 'home') return;
+            // 如果当前在个人中心，先返回主页再切换
+            if (DOM.profilePage.classList.contains('active')) {
+                DOM.profilePage.classList.remove('active');
+            }
+            setActiveTab('home');
+        });
+
+        DOM.navTabGallery.addEventListener('click', function() {
+            if (currentActiveTab === 'gallery') return;
+            // 如果当前在个人中心，先返回主页再切换
+            if (DOM.profilePage.classList.contains('active')) {
+                DOM.profilePage.classList.remove('active');
+            }
+            setActiveTab('gallery');
+        });
+
+        // ========== 工具函数 - 检查登录状态 ==========
         function checkLoginStatus() {
             const isLogin = getSessionLoginStatus();
             if (isLogin) {
@@ -1457,13 +2525,30 @@
                 document.body.classList.remove('no-scroll');
                 loadUserInfoToPage();
                 updateHeaderDisplay();
+                // 恢复上次的标签状态
+                const savedTab = sessionStorage.getItem(STORAGE_KEY.ACTIVE_TAB) || 'home';
+                setActiveTab(savedTab);
+                // 初始化导航指示器位置
+                if (savedTab === 'home') {
+                    updateNavIndicator(DOM.navTabHome);
+                } else {
+                    updateNavIndicator(DOM.navTabGallery);
+                }
             } else {
                 DOM.loginMask.classList.remove('hidden');
                 document.body.classList.add('no-scroll');
+                // 未登录时默认显示首页
+                DOM.homePage.classList.add('active');
+                DOM.galleryPage.classList.remove('active');
+                DOM.profilePage.classList.remove('active');
+                DOM.navTabHome.classList.add('active');
+                DOM.navTabGallery.classList.remove('active');
+                updateNavIndicator(DOM.navTabHome);
+                currentActiveTab = 'home';
             }
         }
 
-        // 工具函数 - 加载用户信息到个人中心页面
+        // ========== 工具函数 - 加载用户信息到个人中心页面 ==========
         function loadUserInfoToPage() {
             const userInfo = getUserInfo();
             DOM.nicknameInput.value = userInfo.nickname || '';
@@ -1480,7 +2565,7 @@
             }
         }
 
-        // 工具函数 - 更新顶部导航栏的头像和昵称显示
+        // ========== 工具函数 - 更新顶部导航栏的头像和昵称显示 ==========
         function updateHeaderDisplay() {
             const userInfo = getUserInfo();
             // 更新头像
@@ -1503,7 +2588,7 @@
             }
         }
 
-        // 工具函数 - 检查密码修改是否在冷却期
+        // ========== 工具函数 - 检查密码修改是否在冷却期 ==========
         function checkPwdModifyLimit() {
             const lastModifyTime = localStorage.getItem(STORAGE_KEY.PWD_MODIFY_TIME);
             if (!lastModifyTime) return true;
@@ -1513,7 +2598,7 @@
             return nowTime - lastTime >= oneMonth;
         }
 
-        // 头像上传处理
+        // ========== 头像上传处理 ==========
         DOM.avatarPreviewWrapper.addEventListener('click', () => {
             DOM.avatarFileInput.click();
         });
@@ -1580,6 +2665,10 @@
                     // 更新顶部导航栏
                     updateHeaderDisplay();
 
+                    // 给新头像图片添加防护属性
+                    DOM.avatarPreviewImg.setAttribute('draggable', 'false');
+                    DOM.accountAvatar.setAttribute('draggable', 'false');
+
                     showToast('头像上传成功', 'success');
                 };
                 img.src = ev.target.result;
@@ -1590,7 +2679,7 @@
             DOM.avatarFileInput.value = '';
         });
 
-        // 登录相关逻辑 - 监听协议勾选和输入框变化
+        // ========== 登录相关逻辑 - 监听协议勾选和输入框变化 ==========
         function updateLoginBtnState() {
             const isChecked = DOM.agreementCheck.checked;
             const hasAccount = DOM.loginAccount.value.trim() !== '';
@@ -1604,7 +2693,7 @@
             input.addEventListener('input', updateLoginBtnState);
         });
 
-        // 登录按钮点击事件
+        // ========== 登录按钮点击事件 ==========
         DOM.loginSubmitBtn.addEventListener('click', () => {
             const account = DOM.loginAccount.value.trim();
             const password = DOM.loginPassword.value.trim();
@@ -1652,6 +2741,14 @@
                 document.body.classList.remove('no-scroll');
                 loadUserInfoToPage();
                 updateHeaderDisplay();
+                // 恢复标签状态
+                const savedTab = sessionStorage.getItem(STORAGE_KEY.ACTIVE_TAB) || 'home';
+                setActiveTab(savedTab);
+                if (savedTab === 'home') {
+                    updateNavIndicator(DOM.navTabHome);
+                } else {
+                    updateNavIndicator(DOM.navTabGallery);
+                }
                 // 清空登录表单
                 DOM.loginAccount.value = '';
                 DOM.loginPassword.value = '';
@@ -1661,7 +2758,7 @@
             }, 800);
         });
 
-        // 页面切换逻辑
+        // ========== 页面切换逻辑 - 账号按钮进入个人中心 ==========
         DOM.accountBtn.addEventListener('click', () => {
             // 检查会话登录状态
             if (!getSessionLoginStatus()) {
@@ -1671,24 +2768,38 @@
                 return;
             }
             DOM.homePage.classList.remove('active');
+            DOM.galleryPage.classList.remove('active');
             DOM.profilePage.classList.add('active');
             loadUserInfoToPage();
             updateHeaderDisplay();
             triggerProfileAnimations();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
+        // ========== 返回按钮 - 从个人中心返回主页 ==========
         DOM.backBtn.addEventListener('click', () => {
             DOM.profilePage.classList.remove('active');
-            DOM.homePage.classList.add('active');
+            // 返回到当前激活的标签页
+            if (currentActiveTab === 'home') {
+                DOM.homePage.classList.add('active');
+                DOM.galleryPage.classList.remove('active');
+                triggerCardAnimations();
+            } else {
+                DOM.galleryPage.classList.add('active');
+                DOM.homePage.classList.remove('active');
+                triggerWaterfallAnimations();
+            }
             updateHeaderDisplay();
-            triggerCardAnimations();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
+        // ========== 取消按钮 ==========
         DOM.cancelBtn.addEventListener('click', () => {
             loadUserInfoToPage();
             showToast('已取消修改', 'success');
         });
 
+        // ========== 保存按钮 ==========
         DOM.saveBtn.addEventListener('click', () => {
             const nickname = DOM.nicknameInput.value.trim();
             if (nickname.length > 10) {
@@ -1706,7 +2817,7 @@
             showToast('昵称保存成功', 'success');
         });
 
-        // 密码修改相关逻辑
+        // ========== 密码修改相关逻辑 ==========
         DOM.modifyPwdBtn.addEventListener('click', () => {
             if (!checkPwdModifyLimit()) {
                 showToast('密码每月仅可修改一次，请下月再试', 'error');
@@ -1760,24 +2871,26 @@
             showToast('密码修改成功，请牢记新密码', 'success');
         });
 
-        // 退出登录按钮点击事件
+        // ========== 退出登录按钮点击事件 ==========
         DOM.logoutBtn.addEventListener('click', () => {
             // 清除会话登录状态（localStorage用户信息保留）
             setSessionLoginStatus(false);
+            sessionStorage.removeItem(STORAGE_KEY.ACTIVE_TAB);
+            currentActiveTab = 'home';
             showToast('已退出登录', 'success');
             setTimeout(() => {
                 window.location.reload();
             }, 800);
         });
 
-        // 点击密码修改弹窗遮罩层关闭弹窗
+        // ========== 点击密码修改弹窗遮罩层关闭弹窗 ==========
         DOM.passwordModalMask.addEventListener('click', (e) => {
             if (e.target === DOM.passwordModalMask) {
                 DOM.passwordModalMask.classList.remove('show');
             }
         });
 
-        // 辅助函数 - 重新触发首页卡片入场动画
+        // ========== 辅助函数 - 重新触发首页卡片入场动画 ==========
         function triggerCardAnimations() {
             const cards = document.querySelectorAll('.content-card');
             cards.forEach(card => {
@@ -1797,7 +2910,27 @@
             homePageEl.classList.add('active');
         }
 
-        // 辅助函数 - 重新触发个人中心动画
+        // ========== 辅助函数 - 重新触发图文瀑布流动画 ==========
+        function triggerWaterfallAnimations() {
+            const items = document.querySelectorAll('.waterfall-item');
+            items.forEach(item => {
+                item.style.animation = 'none';
+                item.offsetHeight;
+                item.style.animation = '';
+            });
+            const galleryTitle = document.querySelector('.gallery-title');
+            if (galleryTitle) {
+                galleryTitle.style.animation = 'none';
+                galleryTitle.offsetHeight;
+                galleryTitle.style.animation = '';
+            }
+            const galleryPageEl = DOM.galleryPage;
+            galleryPageEl.classList.remove('active');
+            galleryPageEl.offsetHeight;
+            galleryPageEl.classList.add('active');
+        }
+
+        // ========== 辅助函数 - 重新触发个人中心动画 ==========
         function triggerProfileAnimations() {
             const formItems = document.querySelectorAll('#profilePage .form-item');
             formItems.forEach(item => {
@@ -1831,13 +2964,19 @@
             }
         }
 
-        // 页面加载完成后初始化
+        // ========== 页面加载完成后初始化 ==========
         window.addEventListener('DOMContentLoaded', () => {
             updateHeaderDisplay();
             checkLoginStatus();
+            // 初始化导航指示器位置
+            if (currentActiveTab === 'home') {
+                updateNavIndicator(DOM.navTabHome);
+            } else {
+                updateNavIndicator(DOM.navTabGallery);
+            }
         });
 
-        // 实时监听：未登录时强制显示登录弹窗（检查sessionStorage）
+        // ========== 实时监听：未登录时强制显示登录弹窗（检查sessionStorage） ==========
         setInterval(() => {
             const isLogin = getSessionLoginStatus();
             if (!isLogin) {
@@ -1848,7 +2987,7 @@
             }
         }, 1000);
 
-        // 页面可见性变化时重新校验（用户切换标签页回来时检查）
+        // ========== 页面可见性变化时重新校验（用户切换标签页回来时检查） ==========
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
                 const isLogin = getSessionLoginStatus();
@@ -1857,9 +2996,57 @@
                     document.body.classList.add('no-scroll');
                 } else {
                     updateHeaderDisplay();
+                    // 更新导航指示器
+                    if (currentActiveTab === 'home') {
+                        updateNavIndicator(DOM.navTabHome);
+                    } else {
+                        updateNavIndicator(DOM.navTabGallery);
+                    }
                 }
             }
         });
+
+        // ========== 窗口大小变化时更新导航指示器位置 ==========
+        let resizeDebounceTimer = null;
+        window.addEventListener('resize', () => {
+            if (resizeDebounceTimer) clearTimeout(resizeDebounceTimer);
+            resizeDebounceTimer = setTimeout(() => {
+                if (currentActiveTab === 'home') {
+                    updateNavIndicator(DOM.navTabHome);
+                } else {
+                    updateNavIndicator(DOM.navTabGallery);
+                }
+            }, 200);
+        });
+
+        // ========== 键盘导航支持（Tab键切换焦点时更新指示器） ==========
+        DOM.navTabHome.addEventListener('focus', function() {
+            if (currentActiveTab === 'home') {
+                updateNavIndicator(DOM.navTabHome);
+            }
+        });
+
+        DOM.navTabGallery.addEventListener('focus', function() {
+            if (currentActiveTab === 'gallery') {
+                updateNavIndicator(DOM.navTabGallery);
+            }
+        });
+
+        // ========== 图文瀑布流卡片点击 - 弹出查看详情提示 ==========
+        document.getElementById('waterfallContainer').addEventListener('click', function(e) {
+            const waterfallItem = e.target.closest('.waterfall-item');
+            if (waterfallItem) {
+                const titleEl = waterfallItem.querySelector('.waterfall-title');
+                const title = titleEl ? titleEl.textContent.trim() : '图文详情';
+                showToast(' 🖼  ' + title.substring(0, 30) + '...', 'success');
+                // 可以在此扩展为打开图文详情弹窗或跳转页面
+            }
+        });
+
+        console.log('✅ QinNian 专属站初始化完成');
+        console.log('📌 导航标签：首页 | 图文（丝滑切换动画）');
+        console.log('🛡️ 全局防护：长按下载已禁止 | 右键菜单已禁止 | 非输入框粘贴已禁止 | 图片拖拽已禁止');
+        console.log('📸 图文瀑布流：小红书/快手/抖音风格，' + document.querySelectorAll('.waterfall-item').length + '条图文已就绪');
     </script>
 </body>
 </html>

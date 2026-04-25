@@ -2,13 +2,11 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 移动端适配核心配置，严格保证手机端样式不偏移 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="QinNian 爱豆专属粉丝网站">
     <meta name="author" content="QinNian 粉丝专属">
     <title>QinNian 专属站</title>
     <style>
-        /* 全局样式重置，保证所有浏览器渲染一致 */
         * {
             margin: 0;
             padding: 0;
@@ -16,7 +14,6 @@
             font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
         }
 
-        /* 全局颜色变量，统一管理，方便后续修改主题 */
         :root {
             --primary-pink: #ffd6dc;
             --accent-red: #ff5c6c;
@@ -28,9 +25,10 @@
             --transition-normal: all 0.3s ease;
             --border-radius-normal: 8px;
             --border-radius-round: 50%;
+            --header-height: 100px;
+            --header-height-mobile: 80px;
         }
 
-        /* html与body基础配置，适配全屏 */
         html,
         body {
             width: 100%;
@@ -40,33 +38,38 @@
             overflow-x: hidden;
         }
 
-        /* 未登录时禁止页面滚动 */
+        body {
+            padding-top: var(--header-height);
+        }
+
         body.no-scroll {
             overflow: hidden;
         }
 
-        /* 顶部导航栏，固定样式，电脑手机端统一核心结构 */
+        /* 顶部导航栏 - 固定定位 */
         header {
             width: 100%;
-            height: 100px;
+            height: var(--header-height);
             background-color: var(--primary-pink);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 40px;
-            position: relative;
-            z-index: 10;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
-        /* 左上角QinNian Logo样式，严格还原设计 */
         .logo {
             font-size: 48px;
             font-weight: 500;
             letter-spacing: 1px;
             color: var(--text-main);
             user-select: none;
-            /* Logo入场动画 */
             animation: logoSlideIn 0.7s ease forwards;
+            flex-shrink: 0;
         }
 
         @keyframes logoSlideIn {
@@ -80,23 +83,36 @@
             }
         }
 
-        /* 右上角账号按钮，圆形红色样式 */
+        /* 右侧容器：账号按钮 + 昵称 */
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        /* 账号按钮缩小版，圆形 */
         .account-btn {
-            width: 80px;
-            height: 80px;
+            width: 50px;
+            height: 50px;
             border-radius: var(--border-radius-round);
             background-color: var(--accent-red);
             color: var(--text-white);
             border: none;
-            font-size: 20px;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             transition: var(--transition-normal);
             display: flex;
             align-items: center;
             justify-content: center;
-            /* 账号按钮脉冲动画，吸引用户注意 */
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
             animation: accountPulse 2.5s ease-in-out infinite;
+            padding: 0;
+            line-height: 1;
         }
 
         @keyframes accountPulse {
@@ -105,33 +121,73 @@
                 box-shadow: 0 0 0 0 rgba(255, 92, 108, 0.5);
             }
             50% {
-                box-shadow: 0 0 0 14px rgba(255, 92, 108, 0);
+                box-shadow: 0 0 0 10px rgba(255, 92, 108, 0);
             }
         }
 
         .account-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(255, 92, 108, 0.4);
+            transform: scale(1.08);
+            box-shadow: 0 4px 14px rgba(255, 92, 108, 0.45);
             animation: none;
         }
 
         .account-btn:active {
-            transform: scale(0.98);
+            transform: scale(0.95);
         }
 
-        /* 页面容器通用样式，控制显示隐藏 */
+        /* 账号按钮内的头像图片 */
+        .account-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            border-radius: var(--border-radius-round);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .account-avatar.visible {
+            display: block;
+        }
+
+        /* 账号按钮内的文字 */
+        .account-text {
+            position: relative;
+            z-index: 1;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .account-text.hidden {
+            opacity: 0;
+        }
+
+        /* 昵称标签 */
+        .user-nickname {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            text-align: center;
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            user-select: none;
+            transition: var(--transition-normal);
+        }
+
+        /* 页面容器通用样式 */
         .page-container {
             width: 100%;
-            min-height: calc(100vh - 100px);
+            min-height: calc(100vh - var(--header-height));
             padding: 30px 40px;
             display: none;
-            /* 修复bug：为profile-btn-group的absolute定位提供参照 */
             position: relative;
         }
 
         .page-container.active {
             display: block;
-            /* 页面容器激活时的淡入动画 */
             animation: pageFadeIn 0.5s ease forwards;
         }
 
@@ -147,14 +203,12 @@
         }
 
         /* 首页样式 */
-        /* 首页标题样式，带红色下划线 */
         .home-title {
             font-size: 32px;
             font-weight: 600;
             position: relative;
             display: inline-block;
             margin-bottom: 30px;
-            /* 标题文字淡入 */
             animation: titleFadeIn 0.6s ease forwards;
         }
 
@@ -178,7 +232,6 @@
             height: 4px;
             background-color: var(--border-red);
             border-radius: 2px;
-            /* 下划线从左到右展开动画 */
             animation: underlineExpand 0.7s ease forwards;
             transform-origin: left center;
         }
@@ -192,7 +245,6 @@
             }
         }
 
-        /* 卡片网格布局，电脑端每行6个，严格还原设计 */
         .card-grid {
             width: 100%;
             display: grid;
@@ -200,7 +252,6 @@
             gap: 25px;
         }
 
-        /* 单个卡片样式，可点击跳转，支持自定义修改 */
         .content-card {
             width: 100%;
             border: 2px solid var(--border-red);
@@ -211,7 +262,6 @@
             text-decoration: none;
             color: var(--text-main);
             display: block;
-            /* 卡片入场动画 - 从下方淡入 */
             opacity: 0;
             animation: cardFadeInUp 0.55s ease forwards;
             animation-delay: 0.05s;
@@ -228,12 +278,10 @@
             }
         }
 
-        /* 第2行卡片（7-12）延迟稍长，形成级联效果 */
         .content-card:nth-child(n+7):nth-child(-n+12) {
             animation-delay: 0.16s;
         }
 
-        /* 第3行及以后卡片（13+）延迟最长 */
         .content-card:nth-child(n+13) {
             animation-delay: 0.27s;
         }
@@ -247,7 +295,6 @@
             transform: translateY(-2px);
         }
 
-        /* 卡片封面图，自适应，可通过修改文件名更换 */
         .card-cover {
             width: 100%;
             aspect-ratio: 16/9;
@@ -261,7 +308,6 @@
             transform: scale(1.04);
         }
 
-        /* 卡片标题样式 */
         .card-title {
             padding: 12px 10px;
             font-size: 18px;
@@ -279,19 +325,17 @@
             font-size: 32px;
             font-weight: 600;
             margin-bottom: 40px;
-            /* 个人中心标题淡入动画 */
             animation: titleFadeIn 0.5s ease forwards;
         }
 
-        /* 个人中心操作按钮组（返回、取消、保存） */
         .profile-btn-group {
             position: absolute;
             top: 30px;
             right: 40px;
             display: flex;
             gap: 15px;
-            /* 按钮组淡入 */
             animation: btnGroupFadeIn 0.5s ease forwards;
+            z-index: 5;
         }
 
         @keyframes btnGroupFadeIn {
@@ -326,11 +370,77 @@
             transform: scale(0.98);
         }
 
-        /* 个人中心表单项样式 */
+        /* 头像上传区域 */
+        .avatar-form-item {
+            margin-bottom: 35px;
+            max-width: 600px;
+            opacity: 0;
+            animation: formItemFadeIn 0.5s ease forwards;
+            animation-delay: 0.02s;
+        }
+
+        .avatar-preview-wrapper {
+            width: 120px;
+            height: 120px;
+            border-radius: var(--border-radius-round);
+            border: 3px dashed var(--border-red);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            transition: var(--transition-normal);
+            background-color: #fdf2f3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-preview-wrapper:hover {
+            border-color: var(--accent-red);
+            box-shadow: 0 4px 16px rgba(255, 59, 78, 0.2);
+            transform: scale(1.03);
+        }
+
+        .avatar-preview-wrapper:active {
+            transform: scale(0.97);
+        }
+
+        .avatar-preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            border-radius: var(--border-radius-round);
+        }
+
+        .avatar-preview-img.visible {
+            display: block;
+        }
+
+        .avatar-placeholder {
+            font-size: 14px;
+            color: #999;
+            text-align: center;
+            pointer-events: none;
+            user-select: none;
+            line-height: 1.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .avatar-placeholder.hidden {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .avatar-tip {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #666666;
+        }
+
+        /* 表单项 */
         .form-item {
             margin-bottom: 35px;
             max-width: 600px;
-            /* 表单项依次淡入 */
             opacity: 0;
             animation: formItemFadeIn 0.5s ease forwards;
         }
@@ -343,6 +453,9 @@
         }
         .form-item:nth-child(5) {
             animation-delay: 0.24s;
+        }
+        .form-item:nth-child(6) {
+            animation-delay: 0.28s;
         }
 
         @keyframes formItemFadeIn {
@@ -390,7 +503,6 @@
             color: #666666;
         }
 
-        /* 密码修改行样式 */
         .password-row {
             display: flex;
             align-items: center;
@@ -418,7 +530,6 @@
             cursor: not-allowed;
         }
 
-        /* 退出登录按钮 */
         .logout-btn {
             width: 100%;
             max-width: 500px;
@@ -432,10 +543,9 @@
             cursor: pointer;
             margin-top: 60px;
             transition: var(--transition-normal);
-            /* 退出按钮淡入，延迟稍长 */
             opacity: 0;
             animation: formItemFadeIn 0.5s ease forwards;
-            animation-delay: 0.32s;
+            animation-delay: 0.34s;
         }
 
         .logout-btn:hover {
@@ -443,7 +553,7 @@
             box-shadow: 0 4px 12px rgba(255, 182, 193, 0.5);
         }
 
-        /* 登录弹窗遮罩层，未登录时全屏覆盖 */
+        /* 登录弹窗遮罩层 */
         .login-mask {
             position: fixed;
             top: 0;
@@ -462,7 +572,6 @@
             display: none;
         }
 
-        /* 登录弹窗主体，严格还原设计 */
         .login-modal {
             width: 100%;
             max-width: 900px;
@@ -474,7 +583,6 @@
             animation: modalShow 0.4s ease forwards;
         }
 
-        /* 弹窗出现动画 */
         @keyframes modalShow {
             from {
                 opacity: 0;
@@ -486,7 +594,6 @@
             }
         }
 
-        /* 弹窗左侧爱豆图片区域 */
         .modal-left {
             width: 40%;
             background-color: var(--primary-pink);
@@ -501,7 +608,6 @@
             height: auto;
             object-fit: contain;
             user-select: none;
-            /* 爱豆图片轻柔呼吸动画 */
             animation: idolBreath 3.5s ease-in-out infinite;
         }
 
@@ -515,7 +621,6 @@
             }
         }
 
-        /* 弹窗右侧登录表单区域 */
         .modal-right {
             width: 60%;
             padding: 50px 40px;
@@ -525,17 +630,17 @@
             font-size: 38px;
             font-weight: 600;
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 35px;
         }
 
         .login-form-item {
-            margin-bottom: 25px;
+            margin-bottom: 22px;
         }
 
         .login-form-label {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 500;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: inline-block;
         }
 
@@ -581,7 +686,6 @@
             cursor: not-allowed;
         }
 
-        /* 登录按钮点击波纹效果 */
         .login-submit-btn::after {
             content: "";
             position: absolute;
@@ -602,7 +706,6 @@
             opacity: 0;
         }
 
-        /* 用户协议勾选区域 */
         .agreement-row {
             display: flex;
             align-items: center;
@@ -622,7 +725,7 @@
             user-select: none;
         }
 
-        /* 提示框样式，用于成功/错误提示 */
+        /* 提示框样式 */
         .toast {
             position: fixed;
             top: 120px;
@@ -632,7 +735,7 @@
             border-radius: 6px;
             font-size: 16px;
             font-weight: 500;
-            z-index: 1000;
+            z-index: 1100;
             opacity: 0;
             pointer-events: none;
             transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -739,9 +842,9 @@
             }
 
             .account-btn {
-                width: 70px;
-                height: 70px;
-                font-size: 18px;
+                width: 45px;
+                height: 45px;
+                font-size: 13px;
             }
 
             header {
@@ -749,28 +852,26 @@
                 height: 90px;
             }
 
+            :root {
+                --header-height: 90px;
+            }
+
+            body {
+                padding-top: 90px;
+            }
+
             .page-container {
                 padding: 25px 30px;
-            }
-        }
-
-        /* 响应式适配 - 手机端，严格还原设计稿手机端样式 */
-        @media screen and (max-width: 768px) {
-            /* 顶部导航栏手机端适配 */
-            header {
-                height: 80px;
-                padding: 0 20px;
+                min-height: calc(100vh - 90px);
             }
 
-            .logo {
-                font-size: 36px;
+            .user-nickname {
+                font-size: 12px;
+                max-width: 70px;
             }
 
-            .account-btn {
-                width: 60px;
-                height: 60px;
-                font-size: 16px;
-                animation: accountPulse 2.5s ease-in-out infinite;
+            .header-right {
+                gap: 4px;
             }
 
             @keyframes accountPulse {
@@ -779,16 +880,61 @@
                     box-shadow: 0 0 0 0 rgba(255, 92, 108, 0.5);
                 }
                 50% {
-                    box-shadow: 0 0 0 10px rgba(255, 92, 108, 0);
+                    box-shadow: 0 0 0 8px rgba(255, 92, 108, 0);
                 }
+            }
+        }
+
+        /* 响应式适配 - 手机端 */
+        @media screen and (max-width: 768px) {
+            header {
+                height: var(--header-height-mobile);
+                padding: 0 20px;
+            }
+
+            :root {
+                --header-height: var(--header-height-mobile);
+            }
+
+            body {
+                padding-top: var(--header-height-mobile);
+            }
+
+            .logo {
+                font-size: 36px;
+            }
+
+            .account-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 12px;
+                animation: accountPulseMobile 2.5s ease-in-out infinite;
+            }
+
+            @keyframes accountPulseMobile {
+                0%,
+                100% {
+                    box-shadow: 0 0 0 0 rgba(255, 92, 108, 0.5);
+                }
+                50% {
+                    box-shadow: 0 0 0 7px rgba(255, 92, 108, 0);
+                }
+            }
+
+            .user-nickname {
+                font-size: 11px;
+                max-width: 60px;
+            }
+
+            .header-right {
+                gap: 3px;
             }
 
             .page-container {
                 padding: 20px;
-                min-height: calc(100vh - 80px);
+                min-height: calc(100vh - var(--header-height-mobile));
             }
 
-            /* 首页手机端适配，每行2个卡片，严格还原设计 */
             .home-title {
                 font-size: 24px;
                 margin-bottom: 20px;
@@ -804,7 +950,6 @@
                 padding: 10px 8px;
             }
 
-            /* 手机端卡片行级延迟适配（每行2个） */
             .content-card:nth-child(n+3):nth-child(-n+4) {
                 animation-delay: 0.16s;
             }
@@ -815,7 +960,6 @@
                 animation-delay: 0.38s;
             }
 
-            /* 个人中心手机端适配 */
             .profile-title {
                 font-size: 24px;
                 margin-bottom: 30px;
@@ -847,7 +991,11 @@
                 margin-top: 40px;
             }
 
-            /* 登录弹窗手机端适配，上下结构，严格还原设计 */
+            .avatar-preview-wrapper {
+                width: 100px;
+                height: 100px;
+            }
+
             .login-modal {
                 flex-direction: column;
                 max-width: 100%;
@@ -855,12 +1003,12 @@
 
             .modal-left {
                 width: 100%;
-                height: 220px;
+                height: 200px;
                 padding: 20px;
             }
 
             .modal-idol-img {
-                max-height: 180px;
+                max-height: 160px;
                 width: auto;
             }
 
@@ -871,11 +1019,15 @@
 
             .modal-title {
                 font-size: 28px;
-                margin-bottom: 30px;
+                margin-bottom: 25px;
             }
 
             .login-form-label {
-                font-size: 22px;
+                font-size: 20px;
+            }
+
+            .login-form-item {
+                margin-bottom: 16px;
             }
 
             .login-submit-btn {
@@ -894,6 +1046,21 @@
                 gap: 15px;
             }
 
+            .account-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 11px;
+            }
+
+            .user-nickname {
+                font-size: 10px;
+                max-width: 50px;
+            }
+
+            .header-right {
+                gap: 2px;
+            }
+
             .modal-right {
                 padding: 25px 20px;
             }
@@ -903,7 +1070,22 @@
             }
 
             .login-form-label {
-                font-size: 20px;
+                font-size: 18px;
+            }
+
+            .avatar-preview-wrapper {
+                width: 85px;
+                height: 85px;
+            }
+
+            @keyframes accountPulseMobile {
+                0%,
+                100% {
+                    box-shadow: 0 0 0 0 rgba(255, 92, 108, 0.5);
+                }
+                50% {
+                    box-shadow: 0 0 0 6px rgba(255, 92, 108, 0);
+                }
             }
         }
     </style>
@@ -912,18 +1094,23 @@
     <!-- 全局提示框 -->
     <div class="toast" id="toast"></div>
 
-    <!-- 顶部导航栏 -->
+    <!-- 顶部导航栏 - 固定定位 -->
     <header>
         <div class="logo">QinNian</div>
-        <button class="account-btn" id="accountBtn">账号</button>
+        <div class="header-right">
+            <button class="account-btn" id="accountBtn" title="个人中心">
+                <img class="account-avatar" id="accountAvatar" src="" alt="头像">
+                <span class="account-text" id="accountText">账号</span>
+            </button>
+            <span class="user-nickname" id="headerNickname"></span>
+        </div>
     </header>
 
     <!-- 首页容器 -->
     <div class="page-container active" id="homePage">
         <h2 class="home-title">首页</h2>
-        <!-- 卡片网格区域，可自由修改卡片数量、图片路径、跳转链接 -->
         <div class="card-grid">
-            <!-- 卡片1，修改href即可更换跳转页面，修改img的src即可更换封面图，修改.card-title即可更换标题 -->
+            <!-- 卡片1 -->
             <a href="./video1.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover1.png" alt="视频封面" class="card-cover">
                 <div class="card-title">鸟儿摇</div>
@@ -1013,52 +1200,61 @@
                 <img src="https://xiaoye6661234.github.io/images/cover18.png" alt="视频封面" class="card-cover">
                 <div class="card-title">凌驾-新</div>
             </a>
-              <a href="./video19.html" class="content-card">
+            <!-- 卡片19 -->
+            <a href="./video19.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover19.png" alt="视频封面" class="card-cover">
                 <div class="card-title">我找茬都说不出这种话</div>
             </a>
-              <a href="./video20.html" class="content-card">
+            <!-- 卡片20 -->
+            <a href="./video20.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover20.png" alt="视频封面" class="card-cover">
                 <div class="card-title">聆听</div>
             </a>
-              <a href="./video21.html" class="content-card">
+            <!-- 卡片21 -->
+            <a href="./video21.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover21.png" alt="视频封面" class="card-cover">
                 <div class="card-title">独攀</div>
             </a>
-              <a href="./video22.html" class="content-card">
+            <!-- 卡片22 -->
+            <a href="./video22.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover22.png" alt="视频封面" class="card-cover">
                 <div class="card-title">神秘进行曲</div>
             </a>
-              <a href="./video23.html" class="content-card">
+            <!-- 卡片23 -->
+            <a href="./video23.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover23.png" alt="视频封面" class="card-cover">
                 <div class="card-title">覃念，你更喜欢谁？</div>
             </a>
-              <a href="./video24.html" class="content-card">
+            <!-- 卡片24 -->
+            <a href="./video24.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover24.png" alt="视频封面" class="card-cover">
                 <div class="card-title">急急那如律令</div>
             </a>
-              <a href="./video25.html" class="content-card">
+            <!-- 卡片25 -->
+            <a href="./video25.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover25.png" alt="视频封面" class="card-cover">
                 <div class="card-title">奶龙大笑</div>
             </a>
-              <a href="./video26.html" class="content-card">
+            <!-- 卡片26 -->
+            <a href="./video26.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover26.png" alt="视频封面" class="card-cover">
                 <div class="card-title">燃烧我的卡路里</div>
             </a>
-              <a href="./video27.html" class="content-card">
+            <!-- 卡片27 -->
+            <a href="./video27.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover27.png" alt="视频封面" class="card-cover">
                 <div class="card-title">跳跃不是罪过</div>
             </a>
-              <a href="./video28.html" class="content-card">
+            <!-- 卡片28 -->
+            <a href="./video28.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover28.png" alt="视频封面" class="card-cover">
                 <div class="card-title">椰汁</div>
             </a>
-              <a href="./video29.html" class="content-card">
+            <!-- 卡片29 -->
+            <a href="./video29.html" class="content-card">
                 <img src="https://xiaoye6661234.github.io/images/cover29.png" alt="视频封面" class="card-cover">
                 <div class="card-title">老梗-kun</div>
             </a>
-            
-            
         </div>
     </div>
 
@@ -1070,6 +1266,17 @@
             <button class="profile-btn" id="saveBtn">保存</button>
         </div>
         <h2 class="profile-title">个人中心</h2>
+
+        <!-- 头像上传区域 -->
+        <div class="avatar-form-item">
+            <label class="form-label">头像:</label>
+            <div class="avatar-preview-wrapper" id="avatarPreviewWrapper" title="点击上传头像">
+                <img class="avatar-preview-img" id="avatarPreviewImg" src="" alt="头像预览">
+                <span class="avatar-placeholder" id="avatarPlaceholder">点击<br>上传</span>
+            </div>
+            <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+            <p class="avatar-tip">*点击圆形区域上传，支持jpg/png，自动缩放至200×200</p>
+        </div>
 
         <div class="form-item">
             <label class="form-label">昵称:</label>
@@ -1099,7 +1306,6 @@
     <div class="login-mask" id="loginMask">
         <div class="login-modal">
             <div class="modal-left">
-                <!-- 爱豆图片，修改src即可更换图片，路径为仓库内相对路径 -->
                 <img src="https://xiaoye6661234.github.io/images/QinNian.png" alt="QinNian" class="modal-idol-img">
             </div>
             <div class="modal-right">
@@ -1111,6 +1317,10 @@
                 <div class="login-form-item">
                     <label class="login-form-label">密码:</label>
                     <input type="password" class="login-form-input" id="loginPassword" placeholder="请输入密码">
+                </div>
+                <div class="login-form-item">
+                    <label class="login-form-label">邀请码:</label>
+                    <input type="text" class="login-form-input" id="loginInviteCode" placeholder="请输入邀请码">
                 </div>
                 <button class="login-submit-btn" id="loginSubmitBtn" disabled>确定</button>
                 <div class="agreement-row">
@@ -1145,12 +1355,13 @@
     </div>
 
     <script>
-        // 全局变量与DOM元素获取
+        // 全局DOM元素获取
         const DOM = {
             // 登录相关
             loginMask: document.getElementById('loginMask'),
             loginAccount: document.getElementById('loginAccount'),
             loginPassword: document.getElementById('loginPassword'),
+            loginInviteCode: document.getElementById('loginInviteCode'),
             agreementCheck: document.getElementById('agreementCheck'),
             loginSubmitBtn: document.getElementById('loginSubmitBtn'),
             // 页面切换相关
@@ -1174,15 +1385,29 @@
             pwdCancelBtn: document.getElementById('pwdCancelBtn'),
             pwdConfirmBtn: document.getElementById('pwdConfirmBtn'),
             // 提示框
-            toast: document.getElementById('toast')
+            toast: document.getElementById('toast'),
+            // 头像相关
+            avatarPreviewWrapper: document.getElementById('avatarPreviewWrapper'),
+            avatarPreviewImg: document.getElementById('avatarPreviewImg'),
+            avatarPlaceholder: document.getElementById('avatarPlaceholder'),
+            avatarFileInput: document.getElementById('avatarFileInput'),
+            accountAvatar: document.getElementById('accountAvatar'),
+            accountText: document.getElementById('accountText'),
+            headerNickname: document.getElementById('headerNickname')
         };
 
-        // 本地存储Key常量，统一管理，防止拼写错误
+        // 本地存储Key常量（登录状态使用sessionStorage实现每次会话需重新登录）
         const STORAGE_KEY = {
             LOGIN_STATUS: 'qinnian_login_status',
             USER_INFO: 'qinnian_user_info',
             PWD_MODIFY_TIME: 'qinnian_pwd_modify_time'
         };
+
+        // 邀请码常量
+        const VALID_INVITE_CODE = '5837490@QinNian';
+
+        // 头像缩放最大尺寸
+        const AVATAR_MAX_SIZE = 200;
 
         // 工具函数 - 提示框
         function showToast(message, type = 'success') {
@@ -1193,14 +1418,15 @@
             }, 3000);
         }
 
-        // 工具函数 - 获取本地存储用户信息
+        // 工具函数 - 获取本地存储用户信息（localStorage持久化）
         function getUserInfo() {
             const userInfo = localStorage.getItem(STORAGE_KEY.USER_INFO);
             return userInfo ? JSON.parse(userInfo) : {
                 account: '',
                 password: '',
                 nickname: '',
-                qinnianId: '5201314666'
+                qinnianId: '5201314666',
+                avatar: ''
             };
         }
 
@@ -1209,64 +1435,180 @@
             localStorage.setItem(STORAGE_KEY.USER_INFO, JSON.stringify(userInfo));
         }
 
+        // 工具函数 - 获取会话登录状态（sessionStorage，每次新会话需重新登录）
+        function getSessionLoginStatus() {
+            return sessionStorage.getItem(STORAGE_KEY.LOGIN_STATUS) === 'true';
+        }
+
+        // 工具函数 - 设置会话登录状态
+        function setSessionLoginStatus(status) {
+            if (status) {
+                sessionStorage.setItem(STORAGE_KEY.LOGIN_STATUS, 'true');
+            } else {
+                sessionStorage.removeItem(STORAGE_KEY.LOGIN_STATUS);
+            }
+        }
+
         // 工具函数 - 检查登录状态
         function checkLoginStatus() {
-            const isLogin = localStorage.getItem(STORAGE_KEY.LOGIN_STATUS) === 'true';
+            const isLogin = getSessionLoginStatus();
             if (isLogin) {
-                // 已登录，隐藏登录弹窗，允许页面滚动
                 DOM.loginMask.classList.add('hidden');
                 document.body.classList.remove('no-scroll');
-                // 加载用户信息到个人中心
                 loadUserInfoToPage();
+                updateHeaderDisplay();
             } else {
-                // 未登录，显示登录弹窗，禁止页面滚动
                 DOM.loginMask.classList.remove('hidden');
                 document.body.classList.add('no-scroll');
             }
         }
 
-        // 工具函数 - 加载用户信息到页面
+        // 工具函数 - 加载用户信息到个人中心页面
         function loadUserInfoToPage() {
             const userInfo = getUserInfo();
             DOM.nicknameInput.value = userInfo.nickname || '';
             DOM.qinnianIdInput.value = userInfo.qinnianId;
+            // 加载头像预览
+            if (userInfo.avatar) {
+                DOM.avatarPreviewImg.src = userInfo.avatar;
+                DOM.avatarPreviewImg.classList.add('visible');
+                DOM.avatarPlaceholder.classList.add('hidden');
+            } else {
+                DOM.avatarPreviewImg.src = '';
+                DOM.avatarPreviewImg.classList.remove('visible');
+                DOM.avatarPlaceholder.classList.remove('hidden');
+            }
+        }
+
+        // 工具函数 - 更新顶部导航栏的头像和昵称显示
+        function updateHeaderDisplay() {
+            const userInfo = getUserInfo();
+            // 更新头像
+            if (userInfo.avatar) {
+                DOM.accountAvatar.src = userInfo.avatar;
+                DOM.accountAvatar.classList.add('visible');
+                DOM.accountText.classList.add('hidden');
+            } else {
+                DOM.accountAvatar.src = '';
+                DOM.accountAvatar.classList.remove('visible');
+                DOM.accountText.classList.remove('hidden');
+            }
+            // 更新昵称
+            const nickname = userInfo.nickname || '';
+            DOM.headerNickname.textContent = nickname;
+            if (nickname) {
+                DOM.headerNickname.style.display = '';
+            } else {
+                DOM.headerNickname.style.display = 'none';
+            }
         }
 
         // 工具函数 - 检查密码修改是否在冷却期
         function checkPwdModifyLimit() {
             const lastModifyTime = localStorage.getItem(STORAGE_KEY.PWD_MODIFY_TIME);
-            if (!lastModifyTime) return true; // 从未修改过，允许修改
-
+            if (!lastModifyTime) return true;
             const lastTime = new Date(lastModifyTime).getTime();
             const nowTime = new Date().getTime();
-            const oneMonth = 30 * 24 * 60 * 60 * 1000; // 30天毫秒数
-
+            const oneMonth = 30 * 24 * 60 * 60 * 1000;
             return nowTime - lastTime >= oneMonth;
         }
 
-        // 登录相关逻辑
-        // 监听协议勾选，控制登录按钮是否可用
-        DOM.agreementCheck.addEventListener('change', () => {
+        // 头像上传处理
+        DOM.avatarPreviewWrapper.addEventListener('click', () => {
+            DOM.avatarFileInput.click();
+        });
+
+        DOM.avatarFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // 校验文件类型
+            if (!file.type.match(/image\/(jpeg|png|webp|gif|bmp)/)) {
+                showToast('请选择jpg、png、webp、gif或bmp格式的图片', 'error');
+                DOM.avatarFileInput.value = '';
+                return;
+            }
+
+            // 校验文件大小（限制5MB）
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('图片大小不能超过5MB', 'error');
+                DOM.avatarFileInput.value = '';
+                return;
+            }
+
+            // 使用FileReader读取并缩放图片
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = function() {
+                    // 使用canvas缩放图片
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // 计算缩放比例，使最大边不超过AVATAR_MAX_SIZE
+                    if (width > height) {
+                        if (width > AVATAR_MAX_SIZE) {
+                            height = Math.round(height * (AVATAR_MAX_SIZE / width));
+                            width = AVATAR_MAX_SIZE;
+                        }
+                    } else {
+                        if (height > AVATAR_MAX_SIZE) {
+                            width = Math.round(width * (AVATAR_MAX_SIZE / height));
+                            height = AVATAR_MAX_SIZE;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // 获取base64（使用jpeg格式压缩，质量0.85）
+                    const base64 = canvas.toDataURL('image/jpeg', 0.85);
+
+                    // 保存到localStorage
+                    const userInfo = getUserInfo();
+                    userInfo.avatar = base64;
+                    saveUserInfo(userInfo);
+
+                    // 更新个人中心预览
+                    DOM.avatarPreviewImg.src = base64;
+                    DOM.avatarPreviewImg.classList.add('visible');
+                    DOM.avatarPlaceholder.classList.add('hidden');
+
+                    // 更新顶部导航栏
+                    updateHeaderDisplay();
+
+                    showToast('头像上传成功', 'success');
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // 清空input以便重复选择同一文件
+            DOM.avatarFileInput.value = '';
+        });
+
+        // 登录相关逻辑 - 监听协议勾选和输入框变化
+        function updateLoginBtnState() {
             const isChecked = DOM.agreementCheck.checked;
             const hasAccount = DOM.loginAccount.value.trim() !== '';
             const hasPassword = DOM.loginPassword.value.trim() !== '';
-            DOM.loginSubmitBtn.disabled = !(isChecked && hasAccount && hasPassword);
-        });
+            const hasInviteCode = DOM.loginInviteCode.value.trim() !== '';
+            DOM.loginSubmitBtn.disabled = !(isChecked && hasAccount && hasPassword && hasInviteCode);
+        }
 
-        // 监听账号密码输入，实时校验登录按钮状态
-        [DOM.loginAccount, DOM.loginPassword].forEach(input => {
-            input.addEventListener('input', () => {
-                const isChecked = DOM.agreementCheck.checked;
-                const hasAccount = DOM.loginAccount.value.trim() !== '';
-                const hasPassword = DOM.loginPassword.value.trim() !== '';
-                DOM.loginSubmitBtn.disabled = !(isChecked && hasAccount && hasPassword);
-            });
+        DOM.agreementCheck.addEventListener('change', updateLoginBtnState);
+        [DOM.loginAccount, DOM.loginPassword, DOM.loginInviteCode].forEach(input => {
+            input.addEventListener('input', updateLoginBtnState);
         });
 
         // 登录按钮点击事件
         DOM.loginSubmitBtn.addEventListener('click', () => {
             const account = DOM.loginAccount.value.trim();
             const password = DOM.loginPassword.value.trim();
+            const inviteCode = DOM.loginInviteCode.value.trim();
 
             // 表单校验
             if (!account) {
@@ -1277,108 +1619,115 @@
                 showToast('请输入密码', 'error');
                 return;
             }
+            if (!inviteCode) {
+                showToast('请输入邀请码', 'error');
+                return;
+            }
+            if (inviteCode !== VALID_INVITE_CODE) {
+                showToast('邀请码错误，请重新输入', 'error');
+                return;
+            }
             if (!DOM.agreementCheck.checked) {
                 showToast('请先同意用户协议与隐私策略', 'error');
                 return;
             }
 
-            // 保存用户信息与登录状态到本地存储
+            // 保存用户信息到localStorage，登录状态到sessionStorage
             const existUserInfo = getUserInfo();
             const newUserInfo = {
                 ...existUserInfo,
                 account: account,
                 password: password,
-                nickname: existUserInfo.nickname || account // 首次登录昵称默认用账号
+                nickname: existUserInfo.nickname || account
             };
             saveUserInfo(newUserInfo);
-            localStorage.setItem(STORAGE_KEY.LOGIN_STATUS, 'true');
+            setSessionLoginStatus(true);
 
             // 登录成功提示
             showToast('登录成功，欢迎回来', 'success');
 
-            // 延迟执行，让提示框显示完成后再隐藏弹窗
+            // 延迟隐藏弹窗
             setTimeout(() => {
                 DOM.loginMask.classList.add('hidden');
                 document.body.classList.remove('no-scroll');
                 loadUserInfoToPage();
+                updateHeaderDisplay();
                 // 清空登录表单
                 DOM.loginAccount.value = '';
                 DOM.loginPassword.value = '';
+                DOM.loginInviteCode.value = '';
                 DOM.agreementCheck.checked = false;
                 DOM.loginSubmitBtn.disabled = true;
             }, 800);
         });
 
         // 页面切换逻辑
-        // 账号按钮点击，切换到个人中心
         DOM.accountBtn.addEventListener('click', () => {
+            // 检查会话登录状态
+            if (!getSessionLoginStatus()) {
+                showToast('请先登录', 'error');
+                DOM.loginMask.classList.remove('hidden');
+                document.body.classList.add('no-scroll');
+                return;
+            }
             DOM.homePage.classList.remove('active');
             DOM.profilePage.classList.add('active');
-            loadUserInfoToPage(); // 每次进入都重新加载用户信息
-            // 重新触发个人中心动画
+            loadUserInfoToPage();
+            updateHeaderDisplay();
             triggerProfileAnimations();
         });
 
-        // 返回按钮点击，切换到首页
         DOM.backBtn.addEventListener('click', () => {
             DOM.profilePage.classList.remove('active');
             DOM.homePage.classList.add('active');
-            // 重新触发首页卡片动画
+            updateHeaderDisplay();
             triggerCardAnimations();
         });
 
-        // 取消按钮点击，重置昵称输入框
         DOM.cancelBtn.addEventListener('click', () => {
             loadUserInfoToPage();
             showToast('已取消修改', 'success');
         });
 
-        // 保存按钮点击，保存昵称修改
         DOM.saveBtn.addEventListener('click', () => {
             const nickname = DOM.nicknameInput.value.trim();
-            // 校验昵称长度
             if (nickname.length > 10) {
                 showToast('昵称不能超过10个字', 'error');
                 return;
             }
 
-            // 保存到本地存储
             const userInfo = getUserInfo();
             userInfo.nickname = nickname;
             saveUserInfo(userInfo);
+
+            // 更新顶部导航栏昵称
+            updateHeaderDisplay();
 
             showToast('昵称保存成功', 'success');
         });
 
         // 密码修改相关逻辑
-        // 修改密码按钮点击
         DOM.modifyPwdBtn.addEventListener('click', () => {
-            // 检查修改次数限制
             if (!checkPwdModifyLimit()) {
                 showToast('密码每月仅可修改一次，请下月再试', 'error');
                 return;
             }
-            // 显示密码修改弹窗
             DOM.passwordModalMask.classList.add('show');
-            // 清空输入框
             DOM.oldPwdInput.value = '';
             DOM.newPwdInput.value = '';
             DOM.confirmPwdInput.value = '';
         });
 
-        // 密码修改弹窗取消按钮
         DOM.pwdCancelBtn.addEventListener('click', () => {
             DOM.passwordModalMask.classList.remove('show');
         });
 
-        // 密码修改弹窗确认按钮
         DOM.pwdConfirmBtn.addEventListener('click', () => {
             const oldPwd = DOM.oldPwdInput.value.trim();
             const newPwd = DOM.newPwdInput.value.trim();
             const confirmPwd = DOM.confirmPwdInput.value.trim();
             const userInfo = getUserInfo();
 
-            // 表单校验
             if (!oldPwd) {
                 showToast('请输入原密码', 'error');
                 return;
@@ -1404,29 +1753,24 @@
                 return;
             }
 
-            // 保存新密码
             userInfo.password = newPwd;
             saveUserInfo(userInfo);
-            // 保存修改时间
             localStorage.setItem(STORAGE_KEY.PWD_MODIFY_TIME, new Date().toISOString());
-            // 关闭弹窗
             DOM.passwordModalMask.classList.remove('show');
-            // 提示成功
             showToast('密码修改成功，请牢记新密码', 'success');
         });
 
         // 退出登录按钮点击事件
         DOM.logoutBtn.addEventListener('click', () => {
-            // 清除登录状态，保留用户信息，方便下次登录
-            localStorage.removeItem(STORAGE_KEY.LOGIN_STATUS);
+            // 清除会话登录状态（localStorage用户信息保留）
+            setSessionLoginStatus(false);
             showToast('已退出登录', 'success');
-            // 延迟刷新页面，回到登录状态
             setTimeout(() => {
                 window.location.reload();
             }, 800);
         });
 
-        // 点击密码修改弹窗遮罩层，关闭弹窗
+        // 点击密码修改弹窗遮罩层关闭弹窗
         DOM.passwordModalMask.addEventListener('click', (e) => {
             if (e.target === DOM.passwordModalMask) {
                 DOM.passwordModalMask.classList.remove('show');
@@ -1438,18 +1782,15 @@
             const cards = document.querySelectorAll('.content-card');
             cards.forEach(card => {
                 card.style.animation = 'none';
-                card.offsetHeight; // 强制回流
+                card.offsetHeight;
                 card.style.animation = '';
             });
-            // 重置标题下划线动画
             const homeTitle = document.querySelector('.home-title');
             if (homeTitle) {
                 homeTitle.style.animation = 'none';
                 homeTitle.offsetHeight;
                 homeTitle.style.animation = '';
-                const afterEl = homeTitle.querySelector('::after');
             }
-            // 通过重新设置类来触发动画
             const homePageEl = DOM.homePage;
             homePageEl.classList.remove('active');
             homePageEl.offsetHeight;
@@ -1464,11 +1805,17 @@
                 item.offsetHeight;
                 item.style.animation = '';
             });
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.style.animation = 'none';
-                logoutBtn.offsetHeight;
-                logoutBtn.style.animation = '';
+            const avatarFormItem = document.querySelector('#profilePage .avatar-form-item');
+            if (avatarFormItem) {
+                avatarFormItem.style.animation = 'none';
+                avatarFormItem.offsetHeight;
+                avatarFormItem.style.animation = '';
+            }
+            const logoutBtnEl = document.getElementById('logoutBtn');
+            if (logoutBtnEl) {
+                logoutBtnEl.style.animation = 'none';
+                logoutBtnEl.offsetHeight;
+                logoutBtnEl.style.animation = '';
             }
             const profileTitle = document.querySelector('.profile-title');
             if (profileTitle) {
@@ -1484,19 +1831,35 @@
             }
         }
 
-        // 页面加载完成后，初始化检查登录状态
+        // 页面加载完成后初始化
         window.addEventListener('DOMContentLoaded', () => {
+            updateHeaderDisplay();
             checkLoginStatus();
         });
 
-        // 禁止未登录时通过F12修改元素隐藏弹窗，实时监听登录状态
+        // 实时监听：未登录时强制显示登录弹窗（检查sessionStorage）
         setInterval(() => {
-            const isLogin = localStorage.getItem(STORAGE_KEY.LOGIN_STATUS) === 'true';
+            const isLogin = getSessionLoginStatus();
             if (!isLogin) {
-                DOM.loginMask.classList.remove('hidden');
-                document.body.classList.add('no-scroll');
+                if (DOM.loginMask.classList.contains('hidden')) {
+                    DOM.loginMask.classList.remove('hidden');
+                    document.body.classList.add('no-scroll');
+                }
             }
         }, 1000);
+
+        // 页面可见性变化时重新校验（用户切换标签页回来时检查）
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                const isLogin = getSessionLoginStatus();
+                if (!isLogin) {
+                    DOM.loginMask.classList.remove('hidden');
+                    document.body.classList.add('no-scroll');
+                } else {
+                    updateHeaderDisplay();
+                }
+            }
+        });
     </script>
 </body>
 </html>

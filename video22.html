@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="QinNian 视频播放页">
+    <title>QinNian - 视频播放</title>
+    <style>
+        /* 全局样式与首页完全统一，保证全站风格一致 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        /* 全局颜色变量，和首页完全同步 */
+        :root {
+            --primary-pink: #ffd6dc;
+            --accent-red: #ff5c6c;
+            --border-pink: #ffb6c1;
+            --text-main: #333333;
+            --text-white: #ffffff;
+            --bg-white: #ffffff;
+            --mask-bg: rgba(0, 0, 0, 0.6);
+            --transition-normal: all 0.3s ease;
+            --border-radius-normal: 6px;
+            --border-radius-round: 50%;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* 顶部导航栏，和首页完全一致 */
+        header {
+            width: 100%;
+            height: 100px;
+            background-color: var(--primary-pink);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            color: var(--text-main);
+            user-select: none;
+            text-decoration: none;
+            animation: logoSlideIn 0.7s ease forwards;
+        }
+
+        @keyframes logoSlideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .account-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--border-radius-round);
+            background-color: var(--accent-red);
+            color: var(--text-white);
+            border: none;
+            font-size: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: accountPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes accountPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 92, 108, 0.5); }
+            50% { box-shadow: 0 0 0 14px rgba(255, 92, 108, 0); }
+        }
+
+        .account-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 92, 108, 0.4);
+            animation: none;
+        }
+
+        .account-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 主内容容器 */
+        .main-container {
+            width: 100%;
+            padding: 30px 40px;
+            max-width: 1920px;
+            margin: 0 auto;
+            animation: mainFadeIn 0.6s ease forwards;
+        }
+
+        @keyframes mainFadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 核心：固定16:9视频容器，现在作为 iframe 嵌入载体 */
+        .video-wrapper {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: 8px solid var(--border-pink);
+            border-radius: var(--border-radius-normal);
+            overflow: hidden;
+            background-color: #f5f5f5;
+            position: relative;
+            animation: videoSlideUp 0.7s ease forwards;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .video-wrapper:hover {
+            box-shadow: 0 8px 25px rgba(255, 182, 193, 0.4);
+        }
+
+        @keyframes videoSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 内嵌 iframe 样式，充满容器 */
+        .video-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background-color: #fff;
+        }
+
+        /* 电脑端布局：视频+信息区左右排列 */
+        .content-row {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .video-section {
+            width: 65%;
+            flex-shrink: 0;
+        }
+
+        .info-section {
+            width: 35%;
+            padding-top: 10px;
+            position: relative;
+            animation: infoFadeIn 0.7s ease 0.15s forwards;
+            opacity: 0;
+        }
+
+        @keyframes infoFadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* 标题样式 */
+        .video-title {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.3;
+            animation: titleFadeIn 0.6s ease forwards;
+        }
+
+        @keyframes titleFadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 返回按钮样式 */
+        .back-btn {
+            padding: 8px 22px;
+            background-color: var(--primary-pink);
+            border: none;
+            border-radius: 4px;
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition-normal);
+            text-decoration: none;
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .back-btn:hover {
+            background-color: #ffc0cb;
+            box-shadow: 0 2px 8px rgba(255, 192, 203, 0.5);
+        }
+
+        .back-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 简介样式 */
+        .video-desc {
+            font-size: 22px;
+            margin: 30px 0;
+            line-height: 1.5;
+            animation: descFadeIn 0.6s ease 0.2s forwards;
+            opacity: 0;
+        }
+
+        @keyframes descFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 外部嵌入提示信息 */
+        .embed-hint {
+            font-size: 15px;
+            color: #888;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: descFadeIn 0.6s ease 0.25s forwards;
+            opacity: 0;
+        }
+
+        .embed-hint-icon {
+            font-size: 18px;
+        }
+
+        /* 互动按钮组 */
+        .interaction-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+            animation: btnGroupFadeIn 0.6s ease 0.3s forwards;
+            opacity: 0;
+        }
+
+        @keyframes btnGroupFadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .interaction-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            padding: 10px 5px;
+            flex: 1;
+            position: relative;
+        }
+
+        .interaction-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .interaction-btn:active {
+            transform: translateY(0);
+        }
+
+        .interaction-btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background-color: rgba(255, 214, 220, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease, opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .interaction-btn:active::after {
+            width: 80px;
+            height: 80px;
+            opacity: 0;
+        }
+
+        .btn-icon {
+            font-size: 36px;
+            transition: var(--transition-normal);
+            user-select: none;
+        }
+
+        .btn-text {
+            font-size: 18px;
+            color: var(--text-main);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .interaction-btn.like-active .btn-icon {
+            color: #d81e06;
+            transform: scale(1.2);
+        }
+
+        .interaction-btn.dislike-active .btn-icon {
+            color: #999999;
+            transform: scale(1.2);
+        }
+
+        .interaction-btn.collect-active .btn-icon {
+            color: #ffb400;
+            transform: scale(1.2);
+        }
+
+        .interaction-btn.share-active .btn-icon {
+            color: #0078d7;
+            transform: scale(1.2);
+        }
+
+        .interaction-btn.like-active .btn-text { color: #d81e06; }
+        .interaction-btn.dislike-active .btn-text { color: #999999; }
+        .interaction-btn.collect-active .btn-text { color: #ffb400; }
+        .interaction-btn.share-active .btn-text { color: #0078d7; }
+
+        /* 全局提示框 */
+        .toast {
+            position: fixed;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background-color: #f0f9ff;
+            color: #0066cc;
+            border: 1px solid #b3d9ff;
+        }
+
+        .toast.error {
+            background-color: #fff2f0;
+            color: #cf1322;
+            border: 1px solid #ffccc7;
+        }
+
+        /* 响应式适配 - 平板端 */
+        @media screen and (max-width: 1200px) {
+            .content-row {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .video-section, .info-section {
+                width: 100%;
+            }
+
+            .back-btn {
+                position: static;
+                margin-bottom: 20px;
+            }
+
+            .video-title {
+                font-size: 28px;
+                margin-bottom: 15px;
+            }
+
+            .video-desc {
+                font-size: 20px;
+                margin: 20px 0;
+            }
+
+            .video-section > .video-title {
+                display: none !important;
+            }
+            .title-row {
+                display: flex !important;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 20px;
+            }
+            .info-section > .back-btn {
+                display: none !important;
+            }
+        }
+
+        /* 响应式适配 - 手机端 */
+        @media screen and (max-width: 768px) {
+            header {
+                height: 80px;
+                padding: 0 20px;
+            }
+
+            .logo {
+                font-size: 36px;
+            }
+
+            .account-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 16px;
+            }
+
+            .main-container {
+                padding: 20px;
+            }
+
+            .content-row {
+                gap: 20px;
+            }
+
+            .video-wrapper {
+                border-width: 6px;
+            }
+
+            .video-section > .video-title {
+                display: none !important;
+            }
+
+            .title-row {
+                display: flex !important;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 20px;
+            }
+
+            .info-section > .back-btn {
+                display: none !important;
+            }
+
+            .video-title {
+                font-size: 24px;
+                margin: 0;
+                max-width: 70%;
+            }
+
+            .back-btn {
+                font-size: 20px;
+                padding: 6px 18px;
+                margin: 0;
+                position: static;
+            }
+
+            .video-desc {
+                font-size: 18px;
+                margin: 0 0 25px 0;
+            }
+
+            .btn-icon {
+                font-size: 32px;
+            }
+
+            .btn-text {
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (max-width: 380px) {
+            .btn-icon {
+                font-size: 28px;
+            }
+
+            .btn-text {
+                font-size: 14px;
+            }
+
+            .video-title {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 全局提示框 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 顶部导航栏 -->
+    <header>
+        <a href="./index.html" class="logo">QinNian</a>
+        <button class="account-btn" id="accountBtn">账号</button>
+    </header>
+
+    <!-- 主内容区 -->
+    <div class="main-container">
+        <div class="content-row">
+            <!-- 视频展示区域 -->
+            <div class="video-section">
+                <!-- 电脑端标题（手机端隐藏） -->
+                <h1 class="video-title" style="display: block;">【视频】神秘进行曲</h1>
+                
+                <!-- 视频容器：直接内嵌外部视频合集页面 -->
+                <div class="video-wrapper">
+                    <iframe 
+                        src="https://xiaoye6661234.github.io/qinnian21-25/video22.mp4" 
+                        class="video-iframe" 
+                        allowfullscreen 
+                        allow="autoplay; encrypted-media; picture-in-picture" 
+                        loading="lazy"
+                        title="QinNian 视频合集">
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- 信息与互动区域 -->
+            <div class="info-section">
+                <!-- 手机端标题+返回按钮行 -->
+                <div class="title-row" style="display: none;">
+                    <h1 class="video-title">神秘进行曲</h1>
+                    <a href="./index.html" class="back-btn">返回</a>
+                </div>
+
+                <!-- 电脑端返回按钮（手机端隐藏） -->
+                <a href="./index.html" class="back-btn" style="display: inline-block;">返回</a>
+
+                <!-- 视频简介 -->
+                <p class="video-desc">【简介】先这样，再这样，然后这样，最后这样就行了</p>
+
+                <!-- 嵌入提示信息 -->
+                <div class="embed-hint">
+                    <span class="embed-hint-icon">📺</span>
+                    <span>下方视频合集直接播放，如无法加载可点击<a href="https://xiaoye6661234.github.io/qinnian21-25/video22.mp4" target="_blank" rel="noopener noreferrer">这里</a>打开</span>
+                </div>
+
+                <!-- 互动按钮组 -->
+                <div class="interaction-group">
+                    <button class="interaction-btn" id="likeBtn" data-type="like">
+                        <span class="btn-icon">❤️</span>
+                        <span class="btn-text">喜欢</span>
+                    </button>
+                    <button class="interaction-btn" id="dislikeBtn" data-type="dislike">
+                        <span class="btn-icon">💔</span>
+                        <span class="btn-text">不感兴趣</span>
+                    </button>
+                    <button class="interaction-btn" id="collectBtn" data-type="collect">
+                        <span class="btn-icon">⭐</span>
+                        <span class="btn-text">收藏</span>
+                    </button>
+                    <button class="interaction-btn" id="shareBtn" data-type="share">
+                        <span class="btn-icon">↗️</span>
+                        <span class="btn-text">转发</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局配置，可修改
+        const CONFIG = {
+            // 当前视频ID，每个视频页面修改为不同的ID，保证互动数据独立
+            videoId: 'video1',
+            // 首页地址
+            homeUrl: './index.html',
+            // 外部视频合集地址（用于转发复制或内嵌）
+            externalVideoUrl: 'https://xiaoye6661234.github.io/qinnian1-5/'
+        };
+
+        // DOM元素获取
+        const DOM = {
+            accountBtn: document.getElementById('accountBtn'),
+            likeBtn: document.getElementById('likeBtn'),
+            dislikeBtn: document.getElementById('dislikeBtn'),
+            collectBtn: document.getElementById('collectBtn'),
+            shareBtn: document.getElementById('shareBtn'),
+            toast: document.getElementById('toast')
+        };
+
+        // 本地存储Key常量
+        const STORAGE_KEY = {
+            LOGIN_STATUS: 'qinnian_login_status',
+            USER_INFO: 'qinnian_user_info',
+            VIDEO_INTERACTION: 'qinnian_video_interaction'
+        };
+
+        // 工具函数 - 提示框
+        function showToast(message, type = 'success') {
+            DOM.toast.textContent = message;
+            DOM.toast.className = `toast show ${type}`;
+            setTimeout(() => {
+                DOM.toast.className = 'toast';
+            }, 3000);
+        }
+
+        // 工具函数 - 获取当前登录用户信息
+        function getLoginUser() {
+            const isLogin = localStorage.getItem(STORAGE_KEY.LOGIN_STATUS) === 'true';
+            if (!isLogin) return null;
+            const userInfo = localStorage.getItem(STORAGE_KEY.USER_INFO);
+            return userInfo ? JSON.parse(userInfo) : null;
+        }
+
+        // 工具函数 - 登录校验
+        function checkLogin() {
+            const user = getLoginUser();
+            if (!user) {
+                showToast('请先登录后再进行操作', 'error');
+                setTimeout(() => {
+                    window.location.href = CONFIG.homeUrl;
+                }, 1000);
+                return false;
+            }
+            return user;
+        }
+
+        // 工具函数 - 获取当前视频的互动状态
+        function getVideoInteraction(userAccount) {
+            const key = `${STORAGE_KEY.VIDEO_INTERACTION}_${userAccount}_${CONFIG.videoId}`;
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : {
+                like: false,
+                dislike: false,
+                collect: false
+            };
+        }
+
+        // 工具函数 - 保存当前视频的互动状态
+        function saveVideoInteraction(userAccount, status) {
+            const key = `${STORAGE_KEY.VIDEO_INTERACTION}_${userAccount}_${CONFIG.videoId}`;
+            localStorage.setItem(key, JSON.stringify(status));
+        }
+
+        // 工具函数 - 渲染互动按钮状态
+        function renderBtnStatus(status) {
+            if (status.like) {
+                DOM.likeBtn.classList.add('like-active');
+            } else {
+                DOM.likeBtn.classList.remove('like-active');
+            }
+            if (status.dislike) {
+                DOM.dislikeBtn.classList.add('dislike-active');
+            } else {
+                DOM.dislikeBtn.classList.remove('dislike-active');
+            }
+            if (status.collect) {
+                DOM.collectBtn.classList.add('collect-active');
+            } else {
+                DOM.collectBtn.classList.remove('collect-active');
+            }
+        }
+
+        // 核心互动逻辑
+        function initInteraction() {
+            const currentUser = checkLogin();
+            if (!currentUser) return;
+
+            let interactionStatus = getVideoInteraction(currentUser.account);
+            renderBtnStatus(interactionStatus);
+
+            DOM.likeBtn.addEventListener('click', () => {
+                if (interactionStatus.like) {
+                    interactionStatus.like = false;
+                    showToast('已取消喜欢');
+                } else {
+                    interactionStatus.like = true;
+                    interactionStatus.dislike = false;
+                    showToast('点赞成功');
+                }
+                saveVideoInteraction(currentUser.account, interactionStatus);
+                renderBtnStatus(interactionStatus);
+            });
+
+            DOM.dislikeBtn.addEventListener('click', () => {
+                if (interactionStatus.dislike) {
+                    interactionStatus.dislike = false;
+                    showToast('已取消不感兴趣');
+                } else {
+                    interactionStatus.dislike = true;
+                    interactionStatus.like = false;
+                    showToast('已标记不感兴趣');
+                }
+                saveVideoInteraction(currentUser.account, interactionStatus);
+                renderBtnStatus(interactionStatus);
+            });
+
+            DOM.collectBtn.addEventListener('click', () => {
+                if (interactionStatus.collect) {
+                    interactionStatus.collect = false;
+                    showToast('已取消收藏');
+                } else {
+                    interactionStatus.collect = true;
+                    showToast('收藏成功');
+                }
+                saveVideoInteraction(currentUser.account, interactionStatus);
+                renderBtnStatus(interactionStatus);
+            });
+
+            DOM.shareBtn.addEventListener('click', () => {
+                // 转发时复制视频合集地址
+                const shareUrl = CONFIG.externalVideoUrl;
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    DOM.shareBtn.classList.add('share-active');
+                    showToast('视频链接已复制，快去转发吧');
+                    setTimeout(() => {
+                        DOM.shareBtn.classList.remove('share-active');
+                    }, 800);
+                }).catch(() => {
+                    showToast('复制失败，请手动复制链接', 'error');
+                });
+            });
+        }
+
+        // 账号按钮点击事件
+        DOM.accountBtn.addEventListener('click', () => {
+            window.location.href = CONFIG.homeUrl;
+        });
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            checkLogin();
+            initInteraction();
+        });
+    </script>
+</body>
+</html>
